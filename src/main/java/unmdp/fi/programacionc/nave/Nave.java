@@ -67,4 +67,15 @@ public abstract class Nave {
 
     }
 
+    //GETTERS
+    public int getCombustible(Nave nave){
+        return this.combustible;
+    }
+
+    public int getEnergia(Nave nave) {
+        return this.energia;
+    }
+
+    public int getDesgaste(Nave nave){
+        return this.desgaste;
 }

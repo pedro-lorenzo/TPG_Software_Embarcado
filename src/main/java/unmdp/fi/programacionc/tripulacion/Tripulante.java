@@ -7,6 +7,16 @@ public class Tripulante {
     protected String origen; // 3 origenes
     protected int antiguedad;
 
+
+    // constructor
+    // no se si validar con excepciones o con pre y post los datos
+    public Tripulante(int id, String nombre, String cargo, String origen, int antiguedad) {
+        this.id = id;
+        this.nombre = nombre;
+        this.cargo = cargo;
+        this.origen = origen;
+        this.antiguedad = antiguedad;
+    }
     //GETTERS
     public int getAntiguedad(){
         return this.antiguedad;
@@ -19,6 +29,7 @@ public class Tripulante {
     public String getCargo(){
         return this.cargo;
     }
+
 
 
 
