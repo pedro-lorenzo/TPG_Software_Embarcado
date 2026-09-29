@@ -1,12 +1,8 @@
 package unmdp.fi.programacionc.nave;
 
-public class NaveExploradora extends Nave{
+public class NaveExploradora extends Nave {
 
-
-
-
-    public NaveExploradora(int combustible, int energia, int desgaste){
-        super(60, 80, 0);
+    public NaveExploradora(int id) {
+        super(id, "Exploradora", 60, 80, 0);
     }
-
 }

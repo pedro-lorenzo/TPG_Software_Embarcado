@@ -8,9 +8,14 @@ public class Tripulante {
     protected int antiguedad;
 
 
-    // constructor
-    // no se si validar con excepciones o con pre y post los datos
+    /**
+     * Los datos llegan ya validados desde quien crea al tripulante, por eso son precondiciones.
+     * pre -> nombre, cargo y origen != null
+     * pre -> antiguedad >= 0
+     */
     public Tripulante(int id, String nombre, String cargo, String origen, int antiguedad) {
+        assert nombre != null && cargo != null && origen != null : "Nombre, cargo y origen no pueden ser nulos";
+        assert antiguedad >= 0 : "La antiguedad no puede ser negativa";
         this.id = id;
         this.nombre = nombre;
         this.cargo = cargo;
