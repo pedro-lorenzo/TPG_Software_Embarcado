@@ -1,58 +1,39 @@
 package unmdp.fi.programacionc.nave;
 
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
-import unmdp.fi.programacionc.motor.MotorWarp;
-import unmdp.fi.programacionc.tripulacion.Tripulante;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-// Manejo de errores:
-//  - pre + assert: datos que el llamador ya conoce y debe validar antes de llamar
-//    (argumentos nulos, negativos, configuracion inicial de las subclases).
-//  - excepcion: condiciones que dependen del estado actual de la nave y que el llamador
-//    no puede garantizar (capacidad excedida, recursos insuficientes).
-//
 // inv -> 0 <= combustible <= TOPE_COMBUSTIBLE
 // inv -> 0 <= energia <= TOPE_ENERGIA
 // inv -> 0 <= desgaste <= TOPE_DESGASTE
-public abstract class Nave {
+public class Tanque {
 
     public static final int TOPE_COMBUSTIBLE = 100;
     public static final int TOPE_ENERGIA = 100;
     public static final int TOPE_DESGASTE = 100;
     public static final int UMBRAL_MANTENIMIENTO = 80;
 
-    protected final int id;
-    protected final String tipo;
-    protected final List<Tripulante> tripulantes = new ArrayList<>();
-    protected final MotorWarp motor = new MotorWarp();
-    protected final Tanque tanque;
+    private int combustible;
+    private int energia;
+    private int desgaste;
 
     /**
-     * pre -> tipo != null
      * pre -> 0 <= combustible <= TOPE_COMBUSTIBLE
      * pre -> 0 <= energia <= TOPE_ENERGIA
-     * pre -> 0 <= desgaste <= TOPE_DESGASTE
-     * post -> la nave cumple la invariante
+     * post -> desgaste == 0 y el tanque cumple la invariante
      */
-    protected Nave(int id, String tipo, int combustible, int energia, int desgaste) {
-        assert tipo != null : "El tipo de nave no puede ser nulo";
+    public Tanque(int combustible, int energia) {
         assert combustible >= 0 && combustible <= TOPE_COMBUSTIBLE : "Combustible inicial fuera de rango: " + combustible;
         assert energia >= 0 && energia <= TOPE_ENERGIA : "Energia inicial fuera de rango: " + energia;
-        assert desgaste >= 0 && desgaste <= TOPE_DESGASTE : "Desgaste inicial fuera de rango: " + desgaste;
-        this.id = id;
-        this.tipo = tipo;
+        this.combustible = combustible;
+        this.energia = energia;
+        this.desgaste = 0;
         assert verificarInvariante();
-        this.tanque = new Tanque(combustible, energia);
     }
 
     /**
      * pre -> carga > 0
      * post -> combustible = combustible anterior + carga
-     *
-     * @throws OperacionInvalidaException si la carga excede la capacidad actual (no se modifica nada)
+     * @throws OperacionInvalidaException si excede la capacidad (no se modifica nada)
      */
     public void cargarCombustible(int carga) {
         assert carga > 0 : "La carga de combustible debe ser positiva";
@@ -66,8 +47,7 @@ public abstract class Nave {
     /**
      * pre -> carga > 0
      * post -> energia = energia anterior + carga
-     *
-     * @throws OperacionInvalidaException si la carga excede la capacidad actual (no se modifica nada)
+     * @throws OperacionInvalidaException si excede la capacidad (no se modifica nada)
      */
     public void cargarEnergia(int carga) {
         assert carga > 0 : "La carga de energia debe ser positiva";
@@ -79,14 +59,12 @@ public abstract class Nave {
     }
 
     /**
-     * Aplica el consumo de una operacion (mision, avance, escaneo, etc) de forma atomica:
-     * si algun recurso no alcanza, no se modifica ningun campo.
+     * Atomico: si algo no alcanza, no se modifica ningun campo.
      * pre -> combustible, energia y desgasteAdicional >= 0
-     * post -> cada recurso queda descontado (o el desgaste incrementado) en el valor indicado
-     *
+     * post -> cada recurso queda descontado (el desgaste incrementado) en el valor indicado
      * @throws OperacionInvalidaException si algun recurso no alcanza o el desgaste quedaria fuera de rango
      */
-    public void consumirParaOperacion(int combustible, int energia, int desgasteAdicional) {
+    public void consumir(int combustible, int energia, int desgasteAdicional) {
         assert combustible >= 0 && energia >= 0 && desgasteAdicional >= 0 : "Los consumos no pueden ser negativos";
         if (this.combustible < combustible) {
             throw new OperacionInvalidaException("Combustible insuficiente para la operacion");
@@ -115,30 +93,13 @@ public abstract class Nave {
         assert verificarInvariante();
     }
 
-    /**
-     * pre -> tripulante != null
-     * post -> el tripulante queda agregado a la tripulacion
-     */
-    public void agregarTripulante(Tripulante tripulante) {
-        assert tripulante != null : "El tripulante no puede ser nulo";
-        this.tripulantes.add(tripulante);
+    private boolean verificarInvariante() {
+        return this.combustible >= 0 && this.combustible <= TOPE_COMBUSTIBLE
+                && this.energia >= 0 && this.energia <= TOPE_ENERGIA
+                && this.desgaste >= 0 && this.desgaste <= TOPE_DESGASTE;
     }
 
-
-    public List<Tripulante> getTripulantes() {
-        return Collections.unmodifiableList(this.tripulantes);
-    }
-
-    public int getId() {
-        return this.id;
-    }
-
-    public String getTipo() {
-        return this.tipo;
-    }
-
-    public MotorWarp getMotor() {
-        return this.motor;
-    }
-
+    public int getCombustible() { return this.combustible; }
+    public int getEnergia()     { return this.energia; }
+    public int getDesgaste()    { return this.desgaste; }
 }

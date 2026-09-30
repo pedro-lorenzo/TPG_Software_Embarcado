@@ -6,23 +6,20 @@ public class MotorWarp {
 
     private EstadoMotor estado = new Disponible();
 
-    public void iniciarPreparacion() {
+    /*prepararSalto(): Disponible → PreparandoSalto
+    saltar(): PreparandoSalto → Warp
+    enfriar(): Warp → Enfriamiento
+    finalizarSalto(): Warp → Disponible*/
+
+    public void prepararSalto() {
         estado.iniciarPreparacion(this);
     }
 
-    public void confirmarSalto() {
+    public void saltar() {
         estado.confirmarSalto(this);
     }
 
-    public void finalizarSalto() {
-        estado.finalizarSalto(this);
-    }
-
-    public void abortarSalto() {
-        estado.abortarSalto(this);
-    }
-
-    public void completarEnfriamiento() {
+    public void enfriar() {
         estado.completarEnfriamiento(this);
     }
 
@@ -33,4 +30,5 @@ public class MotorWarp {
     public String getEstadoActual() {
         return estado.getNombre();
     }
+
 }

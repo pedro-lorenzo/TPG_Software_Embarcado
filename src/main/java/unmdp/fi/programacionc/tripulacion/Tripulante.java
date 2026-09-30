@@ -13,6 +13,7 @@ public class Tripulante {
      * pre -> nombre, cargo y origen != null
      * pre -> antiguedad >= 0
      */
+
     public Tripulante(int id, String nombre, String cargo, String origen, int antiguedad) {
         assert nombre != null && cargo != null && origen != null : "Nombre, cargo y origen no pueden ser nulos";
         assert antiguedad >= 0 : "La antiguedad no puede ser negativa";
