@@ -2,6 +2,7 @@ package unmdp.fi.programacionc.nave;
 
 public class NaveCombate extends Nave {
 
-    super(id, "Combate", 80, 100);
+    public NaveCombate(int id) {
+        super(id, "Combate", 80, 100);
     }
 }

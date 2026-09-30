@@ -1,6 +1,6 @@
-package unmdp.fi.programacionc.exepciones;
+package unmdp.fi.programacionc.excepciones;
 
-public class OperacionInvalida extends RuntimeException {
+public class OperacionInvalidaException extends RuntimeException {
 
     public OperacionInvalidaException(String mensaje) { super(mensaje); }
 }
