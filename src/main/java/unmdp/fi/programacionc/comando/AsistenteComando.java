@@ -1,4 +1,5 @@
 package unmdp.fi.programacionc.comando;
 
-public class Comando {
+public class AsistenteComando {
+
 }
