@@ -9,26 +9,13 @@ import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 // que el llamador no controla, y el enunciado exige que el rechazo quede registrado.
 public interface EstadoMotor {
 
-    default void iniciarPreparacion(MotorWarp motor) {
-        rechazar("iniciarPreparacion");
-    }
+    default void prepararSalto(MotorWarp motor)       { rechazar("prepararSalto"); }
+    default void saltar(MotorWarp motor)              { rechazar("saltar"); }
+    default void enfriar(MotorWarp motor)             { rechazar("enfriar"); }
+    default void finalizarSalto(MotorWarp motor)      { rechazar("finalizarSalto"); }
+    default void completarEnfriamiento(MotorWarp motor) { rechazar("completarEnfriamiento"); }
 
-    default void confirmarSalto(MotorWarp motor) {
-        rechazar("confirmarSalto");
-    }
-
-    default void finalizarSalto(MotorWarp motor) {
-        rechazar("finalizarSalto");
-    }
-
-    default void abortarSalto(MotorWarp motor) {
-        rechazar("abortarSalto");
-    }
-
-    default void completarEnfriamiento(MotorWarp motor) {
-        rechazar("completarEnfriamiento");
-    }
-
+    default boolean estaDisponible() { return false; }
     String getNombre();
 
     default void rechazar(String accion) {

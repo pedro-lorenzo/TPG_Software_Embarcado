@@ -99,6 +99,12 @@ public class Tanque {
                 && this.desgaste >= 0 && this.desgaste <= TOPE_DESGASTE;
     }
 
+    public boolean puedeConsumir(int combustible, int energia, int desgasteAdicional) {
+        return this.combustible >= combustible
+                && this.energia >= energia
+                && this.desgaste + desgasteAdicional <= TOPE_DESGASTE;
+    }
+
     public int getCombustible() { return this.combustible; }
     public int getEnergia()     { return this.energia; }
     public int getDesgaste()    { return this.desgaste; }
