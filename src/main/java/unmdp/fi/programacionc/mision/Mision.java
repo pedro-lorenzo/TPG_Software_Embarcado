@@ -1,7 +1,6 @@
 package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.bitacora.TipoEvento;
-import unmdp.fi.programacionc.comando.AsistenteComando;
 import unmdp.fi.programacionc.excepciones.MisionNoEjecutableException;
 
 /**
@@ -13,6 +12,11 @@ import unmdp.fi.programacionc.excepciones.MisionNoEjecutableException;
  *
  * La mision se encomienda a UN asistente en particular (llega por el constructor) y solo
  * habla con la nave a traves de el. No conoce a la Nave.
+ *
+ * Depende de la interfaz OperadorMision y no de AsistenteComando (SOLID):
+ *  - I (Segregacion de Interfaces): la mision solo ve los metodos que usa.
+ *  - D (Inversion de Dependencias): mision define lo que necesita y comando lo implementa,
+ *    asi el paquete mision no depende del paquete comando.
  *
  * inv -> asistente != null
  * inv -> codigo y nombre != null y no vacios
@@ -27,7 +31,7 @@ public abstract class Mision {
     private final String codigo;
     private final String nombre;
     private final String descripcion;
-    private final AsistenteComando asistente;
+    private final OperadorMision asistente;
 
     private boolean finalizada = false;
 
@@ -35,7 +39,7 @@ public abstract class Mision {
      * pre -> codigo, nombre y descripcion != null y no vacios
      * pre -> asistente != null
      */
-    protected Mision(String codigo, String nombre, String descripcion, AsistenteComando asistente) {
+    protected Mision(String codigo, String nombre, String descripcion, OperadorMision asistente) {
         assert codigo != null && !codigo.trim().isEmpty() : "El codigo de la mision no puede ser nulo ni vacio";
         assert nombre != null && !nombre.trim().isEmpty() : "El nombre de la mision no puede ser nulo ni vacio";
         assert descripcion != null && !descripcion.trim().isEmpty() : "La descripcion no puede ser nula ni vacia";
@@ -149,7 +153,7 @@ public abstract class Mision {
     // ===================== ACCESO PARA LAS SUBCLASES =====================
 
     /** Las subclases hablan con la nave unicamente a traves del asistente. */
-    protected AsistenteComando getAsistente() { return asistente; }
+    protected OperadorMision getAsistente() { return asistente; }
 
     // ===================== CONSULTAS =====================
 
