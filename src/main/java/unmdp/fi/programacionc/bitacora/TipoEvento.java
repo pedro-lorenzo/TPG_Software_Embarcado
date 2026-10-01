@@ -1,11 +1,16 @@
 package unmdp.fi.programacionc.bitacora;
 
-// Clasifica los eventos de la Bitacora segun lo que pide E1-05:
-// cambios del Motor Warp, ejecucion de misiones, operaciones sobre recursos y errores.
-public enum TipoEvento {
-    MOTOR,
-    MISION,
-    RECURSOS,
-    ERROR,
-    INFO
+public final class TipoEvento {
+    public static final String SISTEMA  = "SISTEMA";
+    public static final String MOTOR    = "MOTOR";
+    public static final String RECURSOS = "RECURSOS";
+    public static final String MISION   = "MISION";
+    public static final String ERROR    = "ERROR";
+
+    private TipoEvento() { }   // no se instancia
+
+    public static boolean esValido(String tipo) {
+        return SISTEMA.equals(tipo) || MOTOR.equals(tipo) || RECURSOS.equals(tipo)
+                || MISION.equals(tipo) || ERROR.equals(tipo);
+    }
 }

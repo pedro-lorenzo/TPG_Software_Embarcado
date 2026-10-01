@@ -20,8 +20,8 @@ public class Bitacora {
      * pre -> descripcion != null y no vacia
      * post -> el evento queda al final de la lista con el siguiente numero de secuencia
      */
-    public void registrar(TipoEvento tipo, String descripcion) {
-        assert tipo != null : "El tipo de evento no puede ser nulo";
+    public void registrar(String tipo, String descripcion) {
+        assert TipoEvento.esValido(tipo) : "Tipo de evento invalido: " + tipo;
         assert descripcion != null && !descripcion.trim().isEmpty() : "La descripcion del evento no puede ser nula ni vacia";
         this.eventos.add(new EventoBitacora(this.proximoNumero++, LocalDateTime.now(), tipo, descripcion));
     }
@@ -34,11 +34,11 @@ public class Bitacora {
     /**
      * pre -> tipo != null
      */
-    public List<EventoBitacora> getEventosPorTipo(TipoEvento tipo) {
-        assert tipo != null : "El tipo de evento no puede ser nulo";
+    public List<EventoBitacora> getEventosPorTipo(String tipo) {
+        assert TipoEvento.esValido(tipo) : "Tipo de evento invalido: " + tipo;
         List<EventoBitacora> filtrados = new ArrayList<>();
         for (EventoBitacora evento : this.eventos) {
-            if (evento.getTipo() == tipo) {
+            if (evento.getTipo().equals(tipo)) {      // antes: ==
                 filtrados.add(evento);
             }
         }

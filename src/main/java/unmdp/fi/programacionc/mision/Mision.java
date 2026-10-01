@@ -1,6 +1,7 @@
 package unmdp.fi.programacionc.mision;
 import unmdp.fi.programacionc.nave.Nave;
 
+
 public abstract class Mision {
     protected String id; //puede ser int idk
     protected String nombre;
@@ -15,11 +16,16 @@ public abstract class Mision {
     }
 
     // ACA VAMOS A USAR EL PATRON TEMPLATE!!
-    public final InformeMision ejecutarCiclo(Nave nave){
+    public final InformeMision ejecutarCiclo(Nave nave) {
         preparar(nave);
         ejecutar(nave);
         evaluar(nave);
-        cerrar(nave);
+        return cerrar(nave);
+    }
+
+    public InformeMision cerrar(Nave nave) {
+        // TODO: registrar en bitacora y armar el informe real
+        return new InformeMision();
     }
 
     // estos dos se desarrollan override en cada mision particular
@@ -38,9 +44,6 @@ public abstract class Mision {
         }
     }
 
-    public void cerrar(Nave nave){
-        //registro en bitacora y genera InformeMision??
-    }
 
     public String getId() { return id; }
     public String getNombre() { return nombre; }
