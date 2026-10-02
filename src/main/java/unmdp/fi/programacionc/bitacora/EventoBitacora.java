@@ -11,11 +11,11 @@ public class EventoBitacora {
 
     private final long numero;
     private final LocalDateTime fechaHora;
-    private final TipoEvento tipo;
+    private final String tipo;
     private final String descripcion;
 
     // package-private: solo la Bitacora crea eventos, asi controla la validacion y la numeracion
-    EventoBitacora(long numero, LocalDateTime fechaHora, TipoEvento tipo, String descripcion) {
+    EventoBitacora(long numero, LocalDateTime fechaHora, String tipo, String descripcion) {
         this.numero = numero;
         this.fechaHora = fechaHora;
         this.tipo = tipo;
@@ -30,7 +30,7 @@ public class EventoBitacora {
         return this.fechaHora;
     }
 
-    public TipoEvento getTipo() {
+    public String getTipo() {
         return this.tipo;
     }
 
