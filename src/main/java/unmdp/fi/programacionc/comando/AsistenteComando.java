@@ -6,7 +6,7 @@ import unmdp.fi.programacionc.bitacora.TipoEvento;
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 import unmdp.fi.programacionc.mision.OperadorMision;
 import unmdp.fi.programacionc.motor.MotorWarp;
-import unmdp.fi.programacionc.nave.Tanque;
+import unmdp.fi.programacionc.recursos.Tanque;
 
 import java.util.List;
 

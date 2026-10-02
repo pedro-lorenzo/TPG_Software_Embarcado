@@ -1,6 +1,7 @@
 package unmdp.fi.programacionc.nave;
 
 import unmdp.fi.programacionc.motor.MotorWarp;
+import unmdp.fi.programacionc.recursos.Tanque;
 import unmdp.fi.programacionc.tripulacion.Tripulante;
 import java.util.ArrayList;
 import java.util.Collections;

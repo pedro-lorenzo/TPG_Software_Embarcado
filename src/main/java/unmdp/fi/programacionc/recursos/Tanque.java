@@ -1,4 +1,4 @@
-package unmdp.fi.programacionc.nave;
+package unmdp.fi.programacionc.recursos;
 
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 
