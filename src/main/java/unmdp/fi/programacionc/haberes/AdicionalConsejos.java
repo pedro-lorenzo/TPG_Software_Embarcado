@@ -6,8 +6,8 @@ public class AdicionalConsejos extends DecoratorHaber {
 
     /** pre -> consejos >= 0 */
     public AdicionalConsejos(ComponenteHaber componente, int consejos) {
-        super(componente, new ConceptoHaber(
+        super(componente,
                 "Adicional por consejos (" + consejos + ")",
-                consejos * PG_POR_CONSEJO));
+                consejos * PG_POR_CONSEJO);
     }
 }

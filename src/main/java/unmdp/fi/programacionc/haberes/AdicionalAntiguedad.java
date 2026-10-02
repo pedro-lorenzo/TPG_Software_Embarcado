@@ -7,11 +7,11 @@ public class AdicionalAntiguedad extends DecoratorHaber {
 
     /** pre -> componente != null y tripulante != null */
     public AdicionalAntiguedad(ComponenteHaber componente, Tripulante tripulante) {
-        super(componente, new ConceptoHaber(
+        super(componente,
                 "Adicional por antiguedad (" + tripulante.getAntiguedad() + " anios)",
                 HaberBase.remuneracion(tripulante.getCargo())
                         * tripulante.getAntiguedad()
-                        * porcentaje(tripulante.getCargo()) / 100));
+                        * porcentaje(tripulante.getCargo()) / 100);
     }
 
     // Porcentaje de la remuneracion del cargo por cada anio de antiguedad

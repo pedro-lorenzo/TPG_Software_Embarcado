@@ -6,11 +6,10 @@ import unmdp.fi.programacionc.tripulacion.Tripulante;
 public class SubsidioOrigen extends DecoratorHaber {
 
     public SubsidioOrigen(ComponenteHaber componente, Tripulante tripulante) {
-        super(componente, new ConceptoHaber(
+        super(componente,
                 "Subsidio por origen (" + tripulante.getOrigen() + ")",
-                subsidio(tripulante.getOrigen())));
+                subsidio(tripulante.getOrigen()));
     }
-
     private static double subsidio(String origen) {
         switch (origen) {
             case Origen.TERRICOLA: return 20;

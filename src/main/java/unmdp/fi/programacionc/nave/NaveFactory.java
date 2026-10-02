@@ -26,7 +26,7 @@ public final class NaveFactory {
     private NaveFactory() { }   // solo metodos estaticos, no se instancia
 
     /**
-     * pre -> tipo != null
+     * pre -> TipoNave.esValido(tipo).
      * post -> devuelve una nave nueva, con id distinto a las anteriores, motor Disponible,
      *         desgaste 0 y combustible/energia segun su tipo (Ficha de Inicio E1)
      */
@@ -35,7 +35,7 @@ public final class NaveFactory {
         int id = proximoId++;
         Nave nave;
         switch (tipo) {
-            case TipoNave.EXPLORADORA:                                         // antes: case EXPLORADORA:
+            case TipoNave.EXPLORADORA:
                 nave = crearExploradora(id);
                 break;
             case TipoNave.CARGUERO:

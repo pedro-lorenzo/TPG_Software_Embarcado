@@ -1,6 +1,5 @@
 package unmdp.fi.programacionc.haberes;
 
-import java.util.List;
 
 // Componente del patron Decorator
 public interface ComponenteHaber {

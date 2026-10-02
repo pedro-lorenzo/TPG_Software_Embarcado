@@ -8,11 +8,11 @@ package unmdp.fi.programacionc.tripulacion;
  */
 
 public class Tripulante {
-    protected int id;
-    protected String nombre;
-    protected String cargo; //4 cargos
-    protected String origen; // 3 origenes
-    protected int antiguedad;
+    private final int id;
+    private final String nombre;
+    private final String cargo;    // 4 cargos
+    private final String origen;   // 3 origenes
+    private final int antiguedad;
 
 
     /**
