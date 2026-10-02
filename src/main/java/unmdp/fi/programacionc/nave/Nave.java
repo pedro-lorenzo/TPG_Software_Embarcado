@@ -1,54 +1,62 @@
 package unmdp.fi.programacionc.nave;
 
+import unmdp.fi.programacionc.comando.AsistenteComando;
 import unmdp.fi.programacionc.motor.MotorWarp;
 import unmdp.fi.programacionc.recursos.Tanque;
 import unmdp.fi.programacionc.tripulacion.Tripulante;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// Nave: identidad, tripulacion, motor y recursos. Las invariantes de recursos son de Tanque.
-// Toda consulta u orden llega desde el asistente (motor y tanque no se exponen).
+/**
+ * Nave: identidad, tipo, componentes y tripulacion.
+ *
+ * La nave es duena de sus componentes (composicion), pero NO da ordenes ni expone su estado:
+ * toda consulta u orden sobre motor y recursos pasa por su asistente de comando (R2).
+ * Por eso la nave no tiene metodos que reenvien al tanque o al motor.
+ *
+ * Las naves solo las crea la fabrica (constructores package-private), que arma los
+ * componentes, crea el asistente que los opera y se los pasa a la nave.
+ *
+ * inv -> id > 0
+ * inv -> tipo, tanque, motor y asistente != null
+ */
 public abstract class Nave {
 
     private final int id;
-    private final String tipo;
-    private final List<Tripulante> tripulantes = new ArrayList<>();
-    private final MotorWarp motor = new MotorWarp();
+    private final TipoNave tipo;
     private final Tanque tanque;
+    private final MotorWarp motor;
+    private final AsistenteComando asistente;
+    private final List<Tripulante> tripulantes = new ArrayList<>();
 
     /**
-     * pre -> tipo != null
-     * pre -> combustible y energia dentro de rango (lo verifica Tanque)
+     * pre -> id > 0
+     * pre -> tipo, tanque, motor y asistente != null
+     * pre -> el asistente opera este mismo tanque y este mismo motor (lo garantiza la fabrica)
      */
-    protected Nave(int id, String tipo, int combustible, int energia) {
+    Nave(int id, TipoNave tipo, Tanque tanque, MotorWarp motor, AsistenteComando asistente) {
+        assert id > 0 : "El id de la nave debe ser positivo";
         assert tipo != null : "El tipo de nave no puede ser nulo";
+        assert tanque != null : "La nave necesita un tanque";
+        assert motor != null : "La nave necesita un motor";
+        assert asistente != null : "La nave necesita un asistente de comando";
         this.id = id;
         this.tipo = tipo;
-        this.tanque = new Tanque(combustible, energia);
+        this.tanque = tanque;
+        this.motor = motor;
+        this.asistente = asistente;
     }
 
-    // ---- recursos (delegan en Tanque) ----
-    public void cargarCombustible(int carga) { tanque.cargarCombustible(carga); }
-    public void cargarEnergia(int carga)     { tanque.cargarEnergia(carga); }
-    public void consumirParaOperacion(int c, int e, int d) { tanque.consumir(c, e, d); }
-    public boolean puedeConsumir(int c, int e, int d)      { return tanque.puedeConsumir(c, e, d); }
-    public boolean necesitaMantenimiento()   { return tanque.necesitaMantenimiento(); }
-    public void realizarMantenimiento()      { tanque.realizarMantenimiento(); }
-    public int getCombustible() { return tanque.getCombustible(); }
-    public int getEnergia()     { return tanque.getEnergia(); }
-    public int getDesgaste()    { return tanque.getDesgaste(); }
+    // ---- identidad ----
+    public int getId()          { return id; }
+    public TipoNave getTipo()   { return tipo; }
 
-    // ---- motor (delegan en MotorWarp) ----
-    public void prepararSalto()  { motor.prepararSalto(); }
-    public void saltar()         { motor.saltar(); }
-    public void enfriar()        { motor.enfriar(); }
-    public void finalizarSalto() { motor.finalizarSalto(); }
-    public void completarEnfriamiento() { motor.completarEnfriamiento(); }
-    public boolean estaDisponible() { return motor.estaDisponible(); }
-    public String getEstadoMotor()  { return motor.getEstadoActual(); }
+    // ---- acceso al asistente: unica via para consultar u ordenar a la nave ----
+    public AsistenteComando getAsistente() { return asistente; }
 
-    // ---- tripulacion ----
+    // ---- tripulacion (pendiente: definir clase Tripulacion y su invariante) ----
     /**
      * pre -> tripulante != null
      */
@@ -56,8 +64,6 @@ public abstract class Nave {
         assert t != null : "El tripulante no puede ser nulo";
         tripulantes.add(t);
     }
-    public List<Tripulante> getTripulantes() { return Collections.unmodifiableList(tripulantes); }
 
-    public int getId()      { return id; }
-    public String getTipo() { return tipo; }
+    public List<Tripulante> getTripulantes() { return Collections.unmodifiableList(tripulantes); }
 }
