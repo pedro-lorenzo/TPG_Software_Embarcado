@@ -1,6 +1,7 @@
 package unmdp.fi.programacionc.nave;
 
 import unmdp.fi.programacionc.comando.AsistenteComando;
+import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 import unmdp.fi.programacionc.motor.MotorWarp;
 import unmdp.fi.programacionc.recursos.Tanque;
 
@@ -25,27 +26,26 @@ public final class NaveFactory {
     private NaveFactory() { }   // solo metodos estaticos, no se instancia
 
     /**
-     * pre -> tipo != null
+     * pre -> TipoNave.esValido(tipo).
      * post -> devuelve una nave nueva, con id distinto a las anteriores, motor Disponible,
      *         desgaste 0 y combustible/energia segun su tipo (Ficha de Inicio E1)
      */
-    public static Nave crear(TipoNave tipo) {
-        assert tipo != null : "Hay que indicar el tipo de nave a crear";
+    public static Nave crear(String tipo) {
+        assert TipoNave.esValido(tipo) : "Tipo de nave invalido: " + tipo;
         int id = proximoId++;
         Nave nave;
         switch (tipo) {
-            case EXPLORADORA:
+            case TipoNave.EXPLORADORA:
                 nave = crearExploradora(id);
                 break;
-            case CARGUERO:
+            case TipoNave.CARGUERO:
                 nave = crearCarguero(id);
                 break;
-            case COMBATE:
+            case TipoNave.COMBATE:
                 nave = crearCombate(id);
                 break;
             default:
-                // Solo pasa si se agrega un TipoNave y se olvida su case
-                throw new AssertionError("Tipo de nave no contemplado en la fabrica: " + tipo);
+                throw new OperacionInvalidaException("Tipo de nave inexistente: " + tipo);
         }
         assert nave.getAsistente().estaDisponible() : "La nave debe empezar con el motor Disponible";
         assert nave.getAsistente().getDesgaste() == 0 : "La nave debe empezar sin desgaste";

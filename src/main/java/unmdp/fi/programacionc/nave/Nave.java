@@ -25,7 +25,7 @@ import java.util.List;
 public abstract class Nave {
 
     private final int id;
-    private final TipoNave tipo;
+    private final String tipo;
     private final Tanque tanque;
     private final MotorWarp motor;
     private final AsistenteComando asistente;
@@ -36,9 +36,9 @@ public abstract class Nave {
      * pre -> tipo, tanque, motor y asistente != null
      * pre -> el asistente opera este mismo tanque y este mismo motor (lo garantiza la fabrica)
      */
-    Nave(int id, TipoNave tipo, Tanque tanque, MotorWarp motor, AsistenteComando asistente) {
+    Nave(int id, String tipo, Tanque tanque, MotorWarp motor, AsistenteComando asistente) {
         assert id > 0 : "El id de la nave debe ser positivo";
-        assert tipo != null : "El tipo de nave no puede ser nulo";
+        assert TipoNave.esValido(tipo) : "Tipo de nave invalido: " + tipo;
         assert tanque != null : "La nave necesita un tanque";
         assert motor != null : "La nave necesita un motor";
         assert asistente != null : "La nave necesita un asistente de comando";
@@ -51,7 +51,7 @@ public abstract class Nave {
 
     // ---- identidad ----
     public int getId()          { return id; }
-    public TipoNave getTipo()   { return tipo; }
+    public String getTipo() { return tipo; }
 
     // ---- acceso al asistente: unica via para consultar u ordenar a la nave ----
     public AsistenteComando getAsistente() { return asistente; }
