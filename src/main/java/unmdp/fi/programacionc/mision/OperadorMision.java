@@ -15,6 +15,7 @@ public interface OperadorMision {
     int getCombustible();
     int getEnergia();
     int getDesgaste();
+    boolean necesitaMantenimiento();
 
     // ---- ordenes ----
     void consumir(int combustible, int energia, int desgaste);

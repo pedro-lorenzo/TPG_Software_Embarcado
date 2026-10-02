@@ -55,7 +55,7 @@ public class AsistenteComando implements OperadorMision {
     @Override public int getEnergia()         { return tanque.getEnergia(); }
     @Override public int getDesgaste()        { return tanque.getDesgaste(); }
 
-    public boolean necesitaMantenimiento()    { return tanque.necesitaMantenimiento(); }
+    @Override public boolean necesitaMantenimiento()    { return tanque.necesitaMantenimiento(); }
 
     /** Eventos en orden temporal. La lista no se puede modificar y los eventos son inmutables. */
     public List<EventoBitacora> getEventos()  { return bitacora.getEventos(); }

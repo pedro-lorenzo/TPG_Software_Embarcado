@@ -6,7 +6,6 @@ import unmdp.fi.programacionc.bitacora.TipoEvento;
 public class MisionRetornoSeguro extends Mision {
 
     private static final int ENERGIA_REQUERIDA = 0;
-    private static final int UMBRAL_MANTENIMIENTO = 80;
 
     /**
      * pre -> asistente != null (lo verifica Mision)
@@ -26,7 +25,7 @@ public class MisionRetornoSeguro extends Mision {
      */
     @Override
     protected ResultadoMision evaluar() {
-        boolean operativa = getAsistente().estaDisponible() && getAsistente().getDesgaste() < UMBRAL_MANTENIMIENTO;
+        boolean operativa = getAsistente().estaDisponible() && !getAsistente().necesitaMantenimiento();
         return operativa ? ResultadoMision.EXITOSA : ResultadoMision.FALLIDA;
     }
 
