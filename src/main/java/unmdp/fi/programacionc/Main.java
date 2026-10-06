@@ -1,5 +1,5 @@
 package unmdp.fi.programacionc;
-
+import java.util.List;
 import unmdp.fi.programacionc.bitacora.EventoBitacora;
 import unmdp.fi.programacionc.comando.AsistenteComando;
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
@@ -61,13 +61,13 @@ public class Main {
                 + nave.getTripulantes().size() + " tripulantes");
         mostrarRecursos("Recursos iniciales", asistente);
 
-        ejecutar(new MisionIntercepcion(asistente));
-        ejecutar(new MisionRecoleccion(asistente));
-        ejecutar(new MisionRetornoSeguro(asistente));
+        ejecutar(new MisionIntercepcion(asistente), asistente);
+        ejecutar(new MisionRecoleccion(asistente), asistente);
+        ejecutar(new MisionRetornoSeguro(asistente), asistente);
 
         mostrarRecursos("Recursos finales", asistente);
         mostrarBitacora(asistente);
-        // TODO: mostrar el informe de cada mision cuando InformeMision este implementado (E1-10)
+        // El informe de cada mision (E1-10) es el evento "informe" de la Bitacora (Aclaracion R5)
     }
 
     // ===================== ESCENARIO B: recursos insuficientes =====================
@@ -77,7 +77,7 @@ public class Main {
         asistente.consumir(98, 0, 0);     // deja el combustible en 2: no alcanza para los 4 que pide la mision
         mostrarRecursos("Antes", asistente);
 
-        ejecutar(new MisionIntercepcion(asistente));
+        ejecutar(new MisionIntercepcion(asistente), asistente);
 
         mostrarRecursos("Despues (deben ser iguales)", asistente);
         mostrarBitacora(asistente);
@@ -128,8 +128,10 @@ public class Main {
     // ===================== AUXILIARES DE LA DEMOSTRACION =====================
 
     // La mision se encomienda al asistente que recibio por constructor; Main solo la ejecuta
-    private static void ejecutar(Mision mision) {
+    private static void ejecutar(Mision mision, AsistenteComando asistente) {
         System.out.println(mision.getCodigo() + " " + mision.getNombre() + " -> " + mision.ejecutarCiclo());
+        List<EventoBitacora> eventos = asistente.getEventos();
+        System.out.println("   " + eventos.get(eventos.size() - 1));    // el informe de cierre
     }
 
     // Tripulacion minima de la Ficha: un capitan y cuatro tripulantes mas
