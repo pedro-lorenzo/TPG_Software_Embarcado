@@ -64,6 +64,10 @@ public abstract class Mision {
     public final ResultadoMision ejecutarCiclo() {
         assert !finalizada : "La mision " + codigo + " ya fue ejecutada";
 
+        int combustibleInicial = asistente.getCombustible();
+        int energiaInicial = asistente.getEnergia();
+        int desgasteInicial = asistente.getDesgaste();
+
         ResultadoMision resultado;
         String motivo = null;
         try {
@@ -76,6 +80,16 @@ public abstract class Mision {
             asistente.registrarEvento(TipoEvento.ERROR, codigo + " rechazada: " + motivo);
         }
         cerrar(resultado, motivo);
+
+        // Informe de cierre (Aclaracion R5 / E1-10): la bitacora es el informe
+        asistente.registrarEvento(TipoEvento.MISION, codigo + " informe: " + nombre
+                + " | resultado=" + resultado
+                + " | combustible consumido=" + (combustibleInicial - asistente.getCombustible())
+                + " | energia consumida=" + (energiaInicial - asistente.getEnergia())
+                + " | desgaste producido=" + (asistente.getDesgaste() - desgasteInicial)
+                + " | motor=" + asistente.getEstadoMotor()
+                + " | observaciones=" + (motivo == null ? "ninguna" : motivo));
+
         this.finalizada = true;
         return resultado;
     }
