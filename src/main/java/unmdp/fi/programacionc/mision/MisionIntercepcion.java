@@ -2,9 +2,13 @@ package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.bitacora.TipoEvento;
 
-// Mision M-01 - Intercepcion y asistencia
+/**
+ * M-01 Intercepcion y asistencia. Version simplificada de E1: su accion es simulada
+ * (Aclaracion R4); el contenido real de la mision se define en E2.
+ */
 public class MisionIntercepcion extends Mision {
 
+    private static final int COMBUSTIBLE_REQUERIDO = 4;
     private static final int ENERGIA_REQUERIDA = 5;
 
     /**
@@ -15,14 +19,18 @@ public class MisionIntercepcion extends Mision {
     }
 
     @Override
+    protected int getCombustibleRequerido() {
+        return COMBUSTIBLE_REQUERIDO;
+    }
+
+    @Override
     protected int getEnergiaRequerida() {
         return ENERGIA_REQUERIDA;
     }
 
     /**
-     * Condicion de exito (Ficha E1): la asistencia se completa con recursos suficientes.
-     * Si llegamos aca, ejecutar() ya consumio los recursos sin error; se confirma
-     * ademas que la nave quedo operativa (motor disponible).
+     * Exito: la asistencia se completo con recursos suficientes (ya consumidos en ejecutar())
+     * y la nave quedo operativa (motor disponible).
      */
     @Override
     protected ResultadoMision evaluar() {

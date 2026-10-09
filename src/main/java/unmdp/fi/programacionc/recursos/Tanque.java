@@ -2,9 +2,14 @@ package unmdp.fi.programacionc.recursos;
 
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 
-// inv -> 0 <= combustible <= TOPE_COMBUSTIBLE
-// inv -> 0 <= energia <= TOPE_ENERGIA
-// inv -> 0 <= desgaste <= TOPE_DESGASTE
+/**
+ * Recursos de la nave (E1-09): combustible, energia y desgaste, con sus limites.
+ * Toda operacion que no puede completarse sin violar un limite se rechaza sin modificar nada.
+ *
+ * inv -> 0 <= combustible <= TOPE_COMBUSTIBLE
+ * inv -> 0 <= energia <= TOPE_ENERGIA
+ * inv -> 0 <= desgaste <= TOPE_DESGASTE
+ */
 public class Tanque {
 
     public static final int TOPE_COMBUSTIBLE = 100;

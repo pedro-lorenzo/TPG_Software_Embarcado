@@ -3,18 +3,29 @@ package unmdp.fi.programacionc.haberes;
 import unmdp.fi.programacionc.tripulacion.Origen;
 import unmdp.fi.programacionc.tripulacion.Tripulante;
 
+/**
+ * Subsidio mensual segun el planeta de origen del tripulante.
+ */
 public class SubsidioOrigen extends DecoratorHaber {
 
+    /**
+     * pre -> componente != null
+     * pre -> tripulante != null
+     */
     public SubsidioOrigen(ComponenteHaber componente, Tripulante tripulante) {
         super(componente,
                 "Subsidio por origen (" + tripulante.getOrigen() + ")",
                 subsidio(tripulante.getOrigen()));
     }
-    private static double subsidio(String origen) {
+
+    /**
+     * pre -> origen != null
+     */
+    private static double subsidio(Origen origen) {
         switch (origen) {
-            case Origen.TERRICOLA: return 20;
-            case Origen.VULCANO:   return 30;
-            case Origen.MARCIANO:  return 18;
+            case TERRICOLA: return 20;
+            case VULCANO:   return 30;
+            case MARCIANO:  return 18;
             default: throw new AssertionError("Origen no contemplado: " + origen);
         }
     }

@@ -2,9 +2,13 @@ package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.bitacora.TipoEvento;
 
-// Mision M-03 - Retorno seguro
+/**
+ * M-03 Retorno seguro. Version simplificada de E1: su accion es simulada
+ * (Aclaracion R4); el contenido real de la mision se define en E2.
+ */
 public class MisionRetornoSeguro extends Mision {
 
+    private static final int COMBUSTIBLE_REQUERIDO = 4;
     private static final int ENERGIA_REQUERIDA = 0;
 
     /**
@@ -15,13 +19,18 @@ public class MisionRetornoSeguro extends Mision {
     }
 
     @Override
+    protected int getCombustibleRequerido() {
+        return COMBUSTIBLE_REQUERIDO;
+    }
+
+    @Override
     protected int getEnergiaRequerida() {
         return ENERGIA_REQUERIDA;
     }
 
     /**
-     * Condicion de exito (Ficha E1): la nave finaliza en estado operativo valido.
-     * Operativa = motor disponible y sin necesidad de mantenimiento.
+     * Exito: la nave termina en estado operativo valido, es decir, con el motor disponible
+     * y sin mantenimiento pendiente.
      */
     @Override
     protected ResultadoMision evaluar() {

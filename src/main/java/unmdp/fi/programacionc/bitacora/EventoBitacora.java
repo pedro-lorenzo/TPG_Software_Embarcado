@@ -1,45 +1,37 @@
 package unmdp.fi.programacionc.bitacora;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
-// Evento inmutable: una vez registrado no se puede modificar.
-// El numero de secuencia garantiza el orden aunque dos eventos tengan la misma fechaHora.
-public class EventoBitacora {
-
-    private static final DateTimeFormatter FORMATO_HORA = DateTimeFormatter.ofPattern("HH:mm:ss");
+/**
+ * Evento registrado en una bitacora. Inmutable (Aclaracion R5): campos final y sin metodos
+ * que lo modifiquen. Solo lo crea Bitacora (constructor package-private).
+ *
+ * inv -> numero > 0, fecha != null, tipo != null, descripcion no vacia
+ */
+public final class EventoBitacora {
 
     private final long numero;
-    private final LocalDateTime fechaHora;
-    private final String tipo;
+    private final LocalDateTime fecha;
+    private final TipoEvento tipo;
     private final String descripcion;
 
-    // package-private: solo la Bitacora crea eventos, asi controla la validacion y la numeracion
-    EventoBitacora(long numero, LocalDateTime fechaHora, String tipo, String descripcion) {
+    /**
+     * pre -> datos validos segun el invariante (los garantiza Bitacora)
+     */
+    EventoBitacora(long numero, LocalDateTime fecha, TipoEvento tipo, String descripcion) {
         this.numero = numero;
-        this.fechaHora = fechaHora;
+        this.fecha = fecha;
         this.tipo = tipo;
         this.descripcion = descripcion;
     }
 
-    public long getNumero() {
-        return this.numero;
-    }
-
-    public LocalDateTime getFechaHora() {
-        return this.fechaHora;
-    }
-
-    public String getTipo() {
-        return this.tipo;
-    }
-
-    public String getDescripcion() {
-        return this.descripcion;
-    }
+    public long getNumero()          { return numero; }
+    public LocalDateTime getFecha()  { return fecha; }
+    public TipoEvento getTipo()      { return tipo; }
+    public String getDescripcion()   { return descripcion; }
 
     @Override
     public String toString() {
-        return "#" + numero + " [" + fechaHora.format(FORMATO_HORA) + "] " + tipo + " - " + descripcion;
+        return "#" + numero + " " + fecha + " [" + tipo + "] " + descripcion;
     }
 }

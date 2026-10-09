@@ -4,29 +4,25 @@ import unmdp.fi.programacionc.bitacora.TipoEvento;
 import unmdp.fi.programacionc.excepciones.MisionNoEjecutableException;
 
 /**
+ * Mision encomendada a un asistente de comando (Aclaracion R4).
+ *
  * Patron Template Method: ejecutarCiclo() fija el orden preparar -> ejecutar -> evaluar -> cerrar
- * y ninguna subclase puede alterarlo (es final).
+ * y es final, asi ninguna mision concreta puede alterarlo.
+ *  - Pasos comunes a toda mision (privados): preparar() y ejecutar().
+ *  - Ganchos que define cada mision concreta (abstractos): sus requisitos
+ *    (getCombustibleRequerido, getEnergiaRequerida), su condicion de exito (evaluar) y su cierre (cerrar).
+ * Agregar un tipo de mision es agregar una subclase: las existentes no se modifican (Abierto/Cerrado).
  *
- * Partes comunes (final): preparar() y ejecutar().
- * Ganchos de cada mision concreta (abstractos): getEnergiaRequerida(), evaluar() y cerrar().
+ * La mision no conoce a la Nave: consulta y ordena solo a traves de OperadorMision
+ * (Inversion de Dependencias). Cada instancia se encomienda a un asistente en particular.
  *
- * La mision se encomienda a UN asistente en particular (llega por el constructor) y solo
- * habla con la nave a traves de el. No conoce a la Nave.
- *
- * Depende de la interfaz OperadorMision y no de AsistenteComando (SOLID):
- *  - I (Segregacion de Interfaces): la mision solo ve los metodos que usa.
- *  - D (Inversion de Dependencias): mision define lo que necesita y comando lo implementa,
- *    asi el paquete mision no depende del paquete comando.
- *
+ * inv -> codigo, nombre y descripcion no nulos ni vacios
  * inv -> asistente != null
- * inv -> codigo y nombre != null y no vacios
  */
 public abstract class Mision {
 
-    // Costos comunes a toda mision (Ficha de Inicio E1, punto 5)
-    protected static final int COMBUSTIBLE_REQUERIDO = 4;
-    protected static final int DESGASTE_PRODUCIDO = 4;
-    private static final int TOPE_DESGASTE = 100;
+    /** Desgaste que produce toda mision (Ficha de Inicio E1). */
+    private static final int DESGASTE_PRODUCIDO = 4;
 
     private final String codigo;
     private final String nombre;
@@ -36,7 +32,7 @@ public abstract class Mision {
     private boolean finalizada = false;
 
     /**
-     * pre -> codigo, nombre y descripcion != null y no vacios
+     * pre -> codigo, nombre y descripcion no nulos ni vacios
      * pre -> asistente != null
      */
     protected Mision(String codigo, String nombre, String descripcion, OperadorMision asistente) {
@@ -54,12 +50,13 @@ public abstract class Mision {
 
     /**
      * Ciclo completo de la mision.
-     * Si la preparacion falla (caso esperado: faltan recursos o el motor no esta disponible),
-     * se saltea la parte ejecutable y la mision se cierra igual, como RECHAZADA.
-     * Cualquier otra excepcion no es un caso esperado y se propaga al asistente.
+     * Si la preparacion falla (motor no disponible, mantenimiento pendiente o recursos insuficientes)
+     * no se ejecuta ni se evalua: la mision se cierra como RECHAZADA y la nave no se modifica.
+     * Cualquier otra excepcion no es un caso esperado y se propaga a quien ejecuto la mision.
      *
-     * pre -> la mision no se ejecuto antes
-     * post -> la mision queda finalizada y su resultado registrado en la bitacora
+     * pre -> la mision no fue ejecutada antes
+     * post -> la mision queda finalizada y su informe registrado en la bitacora del asistente
+     * @return EXITOSA, FALLIDA o RECHAZADA
      */
     public final ResultadoMision ejecutarCiclo() {
         assert !finalizada : "La mision " + codigo + " ya fue ejecutada";
@@ -81,7 +78,7 @@ public abstract class Mision {
         }
         cerrar(resultado, motivo);
 
-        // Informe de cierre (Aclaracion R5 / E1-10): la bitacora es el informe
+        // Informe de la mision (Aclaracion R5): la bitacora es el informe
         asistente.registrarEvento(TipoEvento.MISION, codigo + " informe: " + nombre
                 + " | resultado=" + resultado
                 + " | combustible consumido=" + (combustibleInicial - asistente.getCombustible())
@@ -97,8 +94,10 @@ public abstract class Mision {
     // ===================== PASOS COMUNES =====================
 
     /**
-     * Verifica que la mision se pueda realizar ANTES de tocar nada.
-     * Comprueba cada condicion por separado para informar el motivo exacto.
+     * Verifica que la mision se pueda realizar antes de modificar nada (Aclaracion R4).
+     * Revisa cada condicion por separado para dejar el motivo exacto del rechazo.
+     * El tope de desgaste no se revisa aca: lo protege Tanque, y con el desgaste por debajo
+     * del umbral de mantenimiento el desgaste de una mision no lo alcanza.
      *
      * post -> no modifica la nave
      * @throws MisionNoEjecutableException si alguna condicion no se cumple
@@ -110,57 +109,63 @@ public abstract class Mision {
             throw new MisionNoEjecutableException(
                     "el motor no esta disponible (estado: " + asistente.getEstadoMotor() + ")");
         }
-        if (asistente.getCombustible() < COMBUSTIBLE_REQUERIDO) {
+        if (asistente.necesitaMantenimiento()) {
+            throw new MisionNoEjecutableException(
+                    "la nave requiere mantenimiento (desgaste " + asistente.getDesgaste() + ")");
+        }
+        if (asistente.getCombustible() < getCombustibleRequerido()) {
             throw new MisionNoEjecutableException("combustible insuficiente (requiere "
-                    + COMBUSTIBLE_REQUERIDO + ", hay " + asistente.getCombustible() + ")");
+                    + getCombustibleRequerido() + ", hay " + asistente.getCombustible() + ")");
         }
         if (asistente.getEnergia() < getEnergiaRequerida()) {
             throw new MisionNoEjecutableException("energia insuficiente (requiere "
                     + getEnergiaRequerida() + ", hay " + asistente.getEnergia() + ")");
         }
-        if (asistente.getDesgaste() + DESGASTE_PRODUCIDO > TOPE_DESGASTE) {
-            throw new MisionNoEjecutableException("la mision dejaria el desgaste fuera de rango (actual "
-                    + asistente.getDesgaste() + ")");
-        }
-        // DECISION PENDIENTE DEL GRUPO: ¿una nave que necesita mantenimiento (desgaste >= 80)
-        // puede salir de mision? Si la respuesta es no, va un chequeo mas aca.
 
         asistente.registrarEvento(TipoEvento.MISION, codigo + ": preparacion correcta");
     }
 
     /**
-     * Consume los recursos y realiza el salto. Es igual para todas las misiones.
-     * Se consume antes de saltar; como preparar() verifico motor y recursos,
-     * ninguna de estas ordenes deberia fallar. Si alguna falla es un error y se propaga.
+     * Consume los requisitos de la mision y realiza el salto (Aclaracion R4).
+     * Como todavia no se modela el paso del tiempo, el salto termina y el motor vuelve
+     * a Disponible (Aclaracion R3).
      *
      * pre -> preparar() termino sin excepcion (lo garantiza el template)
      */
     private void ejecutar() {
-        asistente.consumir(COMBUSTIBLE_REQUERIDO, getEnergiaRequerida(), DESGASTE_PRODUCIDO);
+        asistente.consumir(getCombustibleRequerido(), getEnergiaRequerida(), DESGASTE_PRODUCIDO);
         asistente.prepararSalto();
         asistente.saltar();
-        // Aclaracion R3: por ahora, al terminar el salto se vuelve directo a Disponible
         asistente.finalizarSalto();
         asistente.registrarEvento(TipoEvento.MISION, codigo + ": " + descripcion);
     }
 
     // ===================== GANCHOS DE CADA MISION =====================
 
-    /** Energia que consume la accion final de esta mision (M-01: 5, M-02: 5, M-03: 0). */
+    /**
+     * Combustible que consume esta mision.
+     * post -> resultado >= 0
+     */
+    protected abstract int getCombustibleRequerido();
+
+    /**
+     * Energia que consume esta mision.
+     * post -> resultado >= 0
+     */
     protected abstract int getEnergiaRequerida();
 
     /**
-     * Revisa la condicion de exito propia de la mision (columna "Condicion de exito" de la Ficha).
+     * Revisa la condicion de exito propia de la mision.
      * post -> devuelve EXITOSA o FALLIDA (nunca RECHAZADA ni null)
      */
     protected abstract ResultadoMision evaluar();
 
     /**
      * Registra el cierre propio de la mision en la bitacora del asistente.
-     * Se llama SIEMPRE, tambien cuando la mision fue rechazada en preparar().
+     * Se llama siempre, tambien cuando la mision fue rechazada en la preparacion.
      *
-     * @param resultado EXITOSA, FALLIDA o RECHAZADA (nunca null)
-     * @param motivo    motivo del rechazo si resultado == RECHAZADA; null en otro caso
+     * pre -> resultado != null
+     * pre -> motivo != null si y solo si resultado == RECHAZADA
      */
     protected abstract void cerrar(ResultadoMision resultado, String motivo);
 
@@ -171,8 +176,8 @@ public abstract class Mision {
 
     // ===================== CONSULTAS =====================
 
-    public String getCodigo()      { return codigo; }
-    public String getNombre()      { return nombre; }
-    public String getDescripcion() { return descripcion; }
+    public String getCodigo()       { return codigo; }
+    public String getNombre()       { return nombre; }
+    public String getDescripcion()  { return descripcion; }
     public boolean estaFinalizada() { return finalizada; }
 }

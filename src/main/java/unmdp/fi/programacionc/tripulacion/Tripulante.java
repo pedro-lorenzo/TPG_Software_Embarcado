@@ -1,30 +1,31 @@
 package unmdp.fi.programacionc.tripulacion;
 
 /**
+ * Tripulante de la nave (E1-04). Inmutable: sus datos no cambian despues de creado.
+ *
  * inv -> nombre != null
- * inv -> cargo y origen son valores admitidos
+ * inv -> cargo != null y origen != null
  * inv -> antiguedad >= 0
- * Inmutable: sus datos no cambian despues de creado.
  */
-
 public class Tripulante {
+
     private final int id;
     private final String nombre;
-    private final String cargo;    // 4 cargos
-    private final String origen;   // 3 origenes
+    private final Cargo cargo;
+    private final Origen origen;
     private final int antiguedad;
 
-
     /**
+     * Los datos llegan validados por quien crea al tripulante, por eso son precondiciones.
+     *
      * pre -> nombre != null
-     * pre -> Cargo.esValido(cargo) y Origen.esValido(origen)
+     * pre -> cargo != null y origen != null
      * pre -> antiguedad >= 0
      */
-
-    public Tripulante(int id, String nombre, String cargo, String origen, int antiguedad) {
+    public Tripulante(int id, String nombre, Cargo cargo, Origen origen, int antiguedad) {
         assert nombre != null : "El nombre no puede ser nulo";
-        assert Cargo.esValido(cargo) : "Cargo invalido: " + cargo;
-        assert Origen.esValido(origen) : "Origen invalido: " + origen;
+        assert cargo != null : "El cargo no puede ser nulo";
+        assert origen != null : "El origen no puede ser nulo";
         assert antiguedad >= 0 : "La antiguedad no puede ser negativa";
         this.id = id;
         this.nombre = nombre;
@@ -32,15 +33,10 @@ public class Tripulante {
         this.origen = origen;
         this.antiguedad = antiguedad;
     }
-    //GETTERS
+
     public int getId()         { return id; }
     public String getNombre()  { return nombre; }
-    public String getCargo()   { return cargo; }
-    public String getOrigen()  { return origen; }
+    public Cargo getCargo()    { return cargo; }
+    public Origen getOrigen()  { return origen; }
     public int getAntiguedad() { return antiguedad; }
-
-
-
-
-
 }
