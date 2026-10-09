@@ -1,4 +1,4 @@
-package unmdp.fi.programacionc.nave;
+package unmdp.fi.programacionc.recursos;
 
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 
@@ -97,12 +97,6 @@ public class Tanque {
         return this.combustible >= 0 && this.combustible <= TOPE_COMBUSTIBLE
                 && this.energia >= 0 && this.energia <= TOPE_ENERGIA
                 && this.desgaste >= 0 && this.desgaste <= TOPE_DESGASTE;
-    }
-
-    public boolean puedeConsumir(int combustible, int energia, int desgasteAdicional) {
-        return this.combustible >= combustible
-                && this.energia >= energia
-                && this.desgaste + desgasteAdicional <= TOPE_DESGASTE;
     }
 
     public int getCombustible() { return this.combustible; }
