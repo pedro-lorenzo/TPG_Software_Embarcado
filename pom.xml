@@ -7,11 +7,70 @@
     <groupId>unmdp.fi.programacionc</groupId>
     <artifactId>tpg-software-embarcado</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>TPG Software Embarcado</name>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <main.class>unmdp.fi.programacionc.Main</main.class>
+        <!-- Extension del ejecutable java segun el sistema operativo (ver perfil windows) -->
+        <java.exe.extension></java.exe.extension>
     </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+
+            <!-- mvn package genera un jar ejecutable: java -ea -jar target/tpg-software-embarcado-1.0-SNAPSHOT.jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>${main.class}</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- mvn compile exec:exec ejecuta Main con las aserciones habilitadas (-ea),
+                 usando el mismo JDK con el que corre Maven -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <executable>${java.home}/bin/java${java.exe.extension}</executable>
+                    <arguments>
+                        <argument>-ea</argument>
+                        <argument>-classpath</argument>
+                        <classpath/>
+                        <argument>${main.class}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <java.exe.extension>.exe</java.exe.extension>
+            </properties>
+        </profile>
+    </profiles>
 </project>

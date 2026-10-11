@@ -2,9 +2,12 @@ package unmdp.fi.programacionc.haberes;
 
 /**
  * Decorator base: envuelve a otro componente y le suma un concepto.
+ * Cada decorador concreto solo calcula su aporte; el total se obtiene encadenando.
+ * Asi se evita una subclase por cada combinacion de cargo, origen y antiguedad.
+ *
  * inv -> componente != null
- * inv -> concepto no vacio
- * inv -> aporte es un numero finito y >= 0
+ * inv -> concepto no nulo ni vacio
+ * inv -> aporte finito y >= 0
  */
 public abstract class DecoratorHaber implements ComponenteHaber {
 
@@ -12,6 +15,11 @@ public abstract class DecoratorHaber implements ComponenteHaber {
     private final String concepto;
     private final double aporte;
 
+    /**
+     * pre -> componente != null
+     * pre -> concepto no nulo ni vacio
+     * pre -> aporte finito y >= 0
+     */
     protected DecoratorHaber(ComponenteHaber componente, String concepto, double aporte) {
         assert componente != null : "El componente a decorar no puede ser nulo";
         assert concepto != null && !concepto.trim().isEmpty() : "El concepto necesita un nombre";

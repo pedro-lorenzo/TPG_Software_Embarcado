@@ -1,10 +1,12 @@
 package unmdp.fi.programacionc.nave;
 
-import unmdp.fi.programacionc.comando.AsistenteComando;
+import unmdp.fi.programacionc.comando.Asistente;
 import unmdp.fi.programacionc.motor.MotorWarp;
 import unmdp.fi.programacionc.recursos.Tanque;
 
-// Nave exploradora. Por ahora se diferencia por su configuracion inicial (Ficha de Inicio E1).
+/**
+ * Nave exploradora. En E1 se diferencia por su configuracion inicial (Ficha de Inicio E1).
+ */
 public class NaveExploradora extends Nave {
 
     // Configuracion inicial: la usa la fabrica para crear el tanque de este tipo
@@ -12,7 +14,7 @@ public class NaveExploradora extends Nave {
     static final int ENERGIA_INICIAL = 80;
 
     // Package-private: solo la fabrica (mismo paquete) puede crear naves
-    NaveExploradora(int id, Tanque tanque, MotorWarp motor, AsistenteComando asistente) {
+    NaveExploradora(int id, Tanque tanque, MotorWarp motor, Asistente asistente) {
         super(id, TipoNave.EXPLORADORA, tanque, motor, asistente);
     }
 }

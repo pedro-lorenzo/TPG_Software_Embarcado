@@ -4,14 +4,14 @@ import unmdp.fi.programacionc.bitacora.Bitacora;
 import unmdp.fi.programacionc.bitacora.EventoBitacora;
 import unmdp.fi.programacionc.bitacora.TipoEvento;
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
-import unmdp.fi.programacionc.mision.OperadorMision;
 import unmdp.fi.programacionc.motor.MotorWarp;
 import unmdp.fi.programacionc.recursos.Tanque;
 
 import java.util.List;
 
 /**
- * Asistente de Comando (E1-03). Opera UNA sola nave: toda consulta u orden a la nave pasa por aca.
+ * Asistente de Comando (E1-03): implementacion de Asistente. Opera UNA sola nave:
+ * toda consulta u orden a la nave pasa por aca.
  *
  * Coordina, no implementa: las reglas de recursos son de Tanque y las transiciones del motor
  * son de los estados (patron State). El asistente solo:
@@ -20,12 +20,12 @@ import java.util.List;
  *   3. si el componente rechaza la orden, registra el error y lo vuelve a lanzar
  *      (throw e) para que quien dio la orden (Main, mision o futura pantalla) se entere.
  *
- * Implementa OperadorMision: lo que las misiones pueden ver. El resto de las ordenes
- * (cargas, mantenimiento, enfriamiento) solo las ve quien tiene al AsistenteComando.
+ * Al implementar Asistente tambien es un OperadorMision: las misiones solo ven esa parte.
+ * El resto de las ordenes (cargas, mantenimiento, enfriamiento) solo las ve quien opera la nave.
  *
  * inv -> tanque != null, motor != null, bitacora != null
  */
-public class AsistenteComando implements OperadorMision {
+public class AsistenteComando implements Asistente {
 
     private final Tanque tanque;
     private final MotorWarp motor;
@@ -58,6 +58,7 @@ public class AsistenteComando implements OperadorMision {
     @Override public boolean necesitaMantenimiento()    { return tanque.necesitaMantenimiento(); }
 
     /** Eventos en orden temporal. La lista no se puede modificar y los eventos son inmutables. */
+    @Override
     public List<EventoBitacora> getEventos()  { return bitacora.getEventos(); }
 
     // ===================== ORDENES AL MOTOR =====================
@@ -119,6 +120,7 @@ public class AsistenteComando implements OperadorMision {
      * En warp -> Enfriamiento.
      * @throws OperacionInvalidaException si el estado actual no lo permite (queda registrado)
      */
+    @Override
     public void enfriar() {
         String accion = "enfriar";
         String antes = motor.getEstadoActual();
@@ -135,6 +137,7 @@ public class AsistenteComando implements OperadorMision {
      * Enfriamiento -> Disponible.
      * @throws OperacionInvalidaException si el estado actual no lo permite (queda registrado)
      */
+    @Override
     public void completarEnfriamiento() {
         String accion = "completar enfriamiento";
         String antes = motor.getEstadoActual();
@@ -173,6 +176,7 @@ public class AsistenteComando implements OperadorMision {
      * pre -> carga > 0 (lo verifica Tanque)
      * @throws OperacionInvalidaException si excede la capacidad (la nave no se modifica)
      */
+    @Override
     public void cargarCombustible(int carga) {
         String accion = "cargar " + carga + " de combustible";
         String antes = estadoRecursos();
@@ -189,6 +193,7 @@ public class AsistenteComando implements OperadorMision {
      * pre -> carga > 0 (lo verifica Tanque)
      * @throws OperacionInvalidaException si excede la capacidad (la nave no se modifica)
      */
+    @Override
     public void cargarEnergia(int carga) {
         String accion = "cargar " + carga + " de energia";
         String antes = estadoRecursos();
@@ -205,6 +210,7 @@ public class AsistenteComando implements OperadorMision {
      * post -> desgaste == 0
      * (Tanque no rechaza esta operacion, por eso no hace falta try/catch)
      */
+    @Override
     public void realizarMantenimiento() {
         String antes = estadoRecursos();
         tanque.realizarMantenimiento();
@@ -217,7 +223,7 @@ public class AsistenteComando implements OperadorMision {
      * pre -> tipo valido, descripcion no nula ni vacia (lo verifica Bitacora)
      */
     @Override
-    public void registrarEvento(String tipo, String descripcion) {
+    public void registrarEvento(TipoEvento tipo, String descripcion) {
         bitacora.registrar(tipo, descripcion);
     }
 

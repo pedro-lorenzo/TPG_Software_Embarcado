@@ -3,25 +3,37 @@ package unmdp.fi.programacionc.haberes;
 import unmdp.fi.programacionc.tripulacion.Cargo;
 import unmdp.fi.programacionc.tripulacion.Tripulante;
 
+/**
+ * Componente concreto del Decorator: remuneracion correspondiente al cargo.
+ * Es el centro de la cadena; no envuelve a ningun otro componente.
+ *
+ * inv -> importe > 0
+ */
 public class HaberBase implements ComponenteHaber {
 
     private final String concepto;
     private final double importe;
 
-    /** pre -> tripulante != null */
+    /**
+     * pre -> tripulante != null
+     */
     public HaberBase(Tripulante tripulante) {
         assert tripulante != null : "El tripulante no puede ser nulo";
         this.concepto = "Remuneracion por cargo (" + tripulante.getCargo() + ")";
         this.importe = remuneracion(tripulante.getCargo());
     }
 
-    // Package-private: tambien la usa AdicionalAntiguedad (se calcula sobre la remuneracion del cargo)
-    static double remuneracion(String cargo) {
+    /**
+     * Remuneracion mensual del cargo, en PG. Tambien la usa AdicionalAntiguedad,
+     * que se calcula sobre este valor y no sobre el total acumulado.
+     * pre -> cargo != null
+     */
+    static double remuneracion(Cargo cargo) {
         switch (cargo) {
-            case Cargo.CAPITAN:   return 1000;
-            case Cargo.CONSEJERO: return 600;
-            case Cargo.TENIENTE:  return 400;
-            case Cargo.ALFEREZ:   return 200;
+            case CAPITAN:   return 1000;
+            case CONSEJERO: return 600;
+            case TENIENTE:  return 400;
+            case ALFEREZ:   return 200;
             default: throw new AssertionError("Cargo no contemplado: " + cargo);
         }
     }
