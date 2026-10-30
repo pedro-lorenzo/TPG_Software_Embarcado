@@ -29,8 +29,37 @@ public final class Coordenada {
      * pre -> el resultado no queda con coordenadas negativas
      * post -> devuelve una coordenada nueva; esta no cambia
      */
+
+
     public Coordenada desplazar(int dx, int dy) {
         return new Coordenada(x + dx, y + dy);
+    }
+
+    /**
+     * Un paso de la ruta en L: primero se avanza en X hasta igualar la del destino,
+     * despues en Y. Siempre una sola casilla.
+     *
+     * pre -> destino != null
+     * pre -> destino distinto de esta coordenada (si ya se llego, no hay paso que dar)
+     * post -> devuelve la coordenada vecina en direccion al destino; esta no cambia
+     */
+    public Coordenada pasoHacia(Coordenada destino) {
+        assert destino != null : "El destino no puede ser nulo";
+        assert !this.equals(destino) : "Ya se esta en el destino " + destino;
+        if (this.x != destino.x) {
+            return desplazar(Integer.signum(destino.x - this.x), 0);
+        }
+        return desplazar(0, Integer.signum(destino.y - this.y));
+    }
+
+    /**
+     * Cantidad de pasos de la ruta en L hasta el destino (distancia Manhattan).
+     * pre -> destino != null
+     * post -> resultado >= 0; es 0 solo si destino es esta misma coordenada
+     */
+    public int distanciaA(Coordenada destino) {
+        assert destino != null : "El destino no puede ser nulo";
+        return Math.abs(destino.x - this.x) + Math.abs(destino.y - this.y);
     }
 
     @Override public boolean equals(Object o) {
