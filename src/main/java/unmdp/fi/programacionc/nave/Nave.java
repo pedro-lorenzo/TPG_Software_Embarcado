@@ -6,7 +6,6 @@ import unmdp.fi.programacionc.recursos.Tanque;
 import unmdp.fi.programacionc.tripulacion.Tripulante;
 import unmdp.fi.programacionc.tablero.Combatiente;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,7 +29,7 @@ public abstract class Nave implements Combatiente {
     private final Tanque tanque;
     private final MotorWarp motor;
     private final Asistente asistente;
-    private final List<Tripulante> tripulantes = new ArrayList<>();
+    private final List<Tripulante> tripulantes;
 
     /**
      * pre -> id > 0
@@ -38,17 +37,19 @@ public abstract class Nave implements Combatiente {
      * pre -> tanque, motor y asistente != null
      * pre -> el asistente opera este mismo tanque y este mismo motor (lo garantiza la fabrica)
      */
-    Nave(int id, TipoNave tipo, Tanque tanque, MotorWarp motor, Asistente asistente) {
+    Nave(int id, TipoNave tipo, Tanque tanque, MotorWarp motor, Asistente asistente,  List<Tripulante> tripulantes) {
         assert id > 0 : "El id de la nave debe ser positivo";
         assert tipo != null : "El tipo de nave no puede ser nulo";
         assert tanque != null : "La nave necesita un tanque";
         assert motor != null : "La nave necesita un motor";
         assert asistente != null : "La nave necesita un asistente de comando";
+        assert tripulantes != null : "La nave necesita su lista de tripulantes";
         this.id = id;
         this.tipo = tipo;
         this.tanque = tanque;
         this.motor = motor;
         this.asistente = asistente;
+        this.tripulantes = tripulantes;
     }
 
     // ---- identidad ----
