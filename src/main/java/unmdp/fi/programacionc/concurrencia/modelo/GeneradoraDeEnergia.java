@@ -1,31 +1,28 @@
 package unmdp.fi.programacionc.concurrencia.modelo;
 
+import unmdp.fi.programacionc.concurrencia.observer.EmisorEventos;
+
 import java.util.Random;
 
-/**
- * Productor. Es un Runnable: describe la tarea, el hilo se crea en el Main.
- */
-public class GeneradoraDeEnergia implements Runnable {
-    private final PlataformaDeCarga plataforma;
-    private final int cantidadADepositar;
-    private final Random random = new Random();
+/** Productor: produce una bateria y la deposita en la plataforma, una y otra vez. */
+public class GeneradoraDeEnergia extends EntidadParalela {
 
-    public GeneradoraDeEnergia(PlataformaDeCarga plataforma, int cantidadADepositar) {
+    private final PlataformaDeCarga plataforma;
+    private final Random azar = new Random();
+
+    /**
+     * pre -> plataforma != null (el resto lo verifica EntidadParalela)
+     */
+    public GeneradoraDeEnergia(String nombre, PlataformaDeCarga plataforma, EmisorEventos emisor) {
+        super(nombre, emisor);
+        assert plataforma != null : "Falta la plataforma";
         this.plataforma = plataforma;
-        this.cantidadADepositar = cantidadADepositar;
     }
 
     @Override
-    public void run() {
-        String nombre = Thread.currentThread().getName();
-        try {
-            for (int i = 0; i < cantidadADepositar; i++) {
-                Thread.sleep(100 + random.nextInt(200));   // tarda en producir la bateria
-                plataforma.deposita();
-            }
-            System.out.println(nombre + " termino su turno");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();   // restauramos la marca de interrupcion
-        }
+    protected void ciclo() throws InterruptedException {
+        Thread.sleep(300 + azar.nextInt(400));          // tarda en producir (fuera del monitor)
+        getEmisor().emitir("Batería producida por " + getNombre() + ".");
+        plataforma.depositar(getNombre());
     }
 }

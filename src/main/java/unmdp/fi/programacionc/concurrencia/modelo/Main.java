@@ -1,25 +1,22 @@
 package unmdp.fi.programacionc.concurrencia.modelo;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/** Demostracion por consola del universo paralelo, sin interfaz grafica. */
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        PlataformaDeCarga plataforma = new PlataformaDeCarga(3);   // UNA sola plataforma compartida
+        UniversoParalelo universo = new UniversoParalelo();
+        universo.agregarObservador(evento -> System.out.println(evento));
 
-        List<Thread> hilos = new ArrayList<>();
-        hilos.add(new Thread(new GeneradoraDeEnergia(plataforma, 4), "Generadora 1"));
-        hilos.add(new Thread(new GeneradoraDeEnergia(plataforma, 4), "Generadora 2"));
-        hilos.add(new Thread(new GeneradoraDeEnergia(plataforma, 4), "Generadora 3"));
-        hilos.add(new Thread(new NaveConsumidora(plataforma, 6), "Nave 1"));
-        hilos.add(new Thread(new NaveConsumidora(plataforma, 6), "Nave 2"));
+        universo.agregarGeneradora();
+        universo.agregarGeneradora();
+        universo.agregarNave();
+        Thread.sleep(4000);
 
-        for (Thread hilo : hilos) {
-            hilo.start();
-        }
-        for (Thread hilo : hilos) {
-            hilo.join();
-        }
+        universo.agregarNave();                 // se suma en vivo, mientras la simulacion corre
+        universo.agregarGeneradora();
+        Thread.sleep(4000);
+
+        universo.detener();
+        universo.esperarFin();
         System.out.println("Se termino la simulacion");
     }
 }
