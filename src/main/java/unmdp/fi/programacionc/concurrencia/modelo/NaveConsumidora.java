@@ -1,30 +1,28 @@
 package unmdp.fi.programacionc.concurrencia.modelo;
+
+import unmdp.fi.programacionc.concurrencia.observer.EmisorEventos;
+
 import java.util.Random;
 
-/**
- * Consumidor. Tambien es un Runnable.
- */
-public class NaveConsumidora implements Runnable {
-    private final PlataformaDeCarga plataforma;
-    private final int cantidadARetirar;
-    private final Random random = new Random();
+/** Consumidor: pide una bateria, la retira de la plataforma y se abastece, una y otra vez. */
+public class NaveConsumidora extends EntidadParalela {
 
-    public NaveConsumidora(PlataformaDeCarga plataforma, int cantidadARetirar) {
+    private final PlataformaDeCarga plataforma;
+    private final Random azar = new Random();
+
+    /**
+     * pre -> plataforma != null (el resto lo verifica EntidadParalela)
+     */
+    public NaveConsumidora(String nombre, PlataformaDeCarga plataforma, EmisorEventos emisor) {
+        super(nombre, emisor);
+        assert plataforma != null : "Falta la plataforma";
         this.plataforma = plataforma;
-        this.cantidadARetirar = cantidadARetirar;
     }
 
     @Override
-    public void run() {
-        String nombre = Thread.currentThread().getName();
-        try {
-            for (int i = 0; i < cantidadARetirar; i++) {
-                plataforma.retira();
-                Thread.sleep(300 + random.nextInt(300));   // se abastece con la bateria
-            }
-            System.out.println(nombre + " no necesita mas baterias");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+    protected void ciclo() throws InterruptedException {
+        getEmisor().emitir(getNombre() + " solicitando batería.");
+        plataforma.retirar(getNombre());
+        Thread.sleep(500 + azar.nextInt(500));          // se abastece (fuera del monitor)
     }
 }
