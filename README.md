@@ -29,7 +29,7 @@ Desde IntelliJ: ejecutar `Main` agregando `-ea` en *VM options*.
 
 ## Verificación
 
-`Main` simula al usuario y reproduce los escenarios de la Ficha de Inicio E1. Cada escenario imprime los recursos y la bitácora del asistente.
+`Main` simula al usuario y reproduce los escenarios de la Ficha de Inicio E1 (A a D) y la liquidación de haberes (E). Los escenarios A a D imprimen los recursos y la bitácora del asistente; el E imprime el desglose del haber de cada tripulante.
 
 | Escenario | Qué muestra | Resultado esperado |
 |---|---|---|
@@ -38,6 +38,7 @@ Desde IntelliJ: ejecutar `Main` agregando `-ea` en *VM options*.
 | B — Recursos insuficientes y mantenimiento | Misión sin combustible suficiente; misión con mantenimiento pendiente; mantenimiento | RECHAZADA sin cambios en la nave; RECHAZADA con desgaste 80; mantenimiento 80→0; la misión siguiente EXITOSA |
 | C — Motor warp | Recorrido válido y una transición inválida | Disponible → Preparando salto → En warp → Enfriamiento → Disponible; `saltar` desde Disponible se rechaza y queda registrado |
 | D — Contrato inválido | Carga de combustible que excede la capacidad | Se rechaza y los recursos no cambian |
+| E — Haberes | Liquidación mensual de los cinco tripulantes de la nave (los 4 cargos y los 3 orígenes) con la cadena de decoradores, un concepto por línea y el total | Capitán Ruiz 3020 PG; Consejera Sol 816 PG (incluye 6 PG por 3 consejos); Teniente Gomez 466 PG; Alférez Paz 221 PG; Teniente Luna 466 PG |
 
 ## Estructura
 

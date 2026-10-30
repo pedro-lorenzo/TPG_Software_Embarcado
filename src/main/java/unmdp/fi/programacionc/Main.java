@@ -5,6 +5,8 @@ import java.util.List;
 import unmdp.fi.programacionc.bitacora.EventoBitacora;
 import unmdp.fi.programacionc.comando.Asistente;
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
+import unmdp.fi.programacionc.haberes.ComponenteHaber;
+import unmdp.fi.programacionc.haberes.LiquidadorHaberes;
 import unmdp.fi.programacionc.mision.Mision;
 import unmdp.fi.programacionc.mision.MisionIntercepcion;
 import unmdp.fi.programacionc.mision.MisionRecoleccion;
@@ -27,10 +29,14 @@ import unmdp.fi.programacionc.universo.Universo;
  * Usa varias naves solo para mostrar cada escenario por separado.
  *
  * Escenarios de la Ficha de Inicio E1: A (ejecucion correcta), B (recursos insuficientes
- * y mantenimiento), C (motor warp) y D (contrato invalido).
+ * y mantenimiento), C (motor warp) y D (contrato invalido). El escenario E muestra la
+ * liquidacion de haberes de la tripulacion (E1-08).
  * Ejecutar con -ea para que tambien se verifiquen los contratos (assert).
  */
 public class Main {
+
+    // Consejos registrados en el periodo liquidado (solo suman al haber del consejero)
+    private static final int CONSEJOS_DEL_PERIODO = 3;
 
     public static void main(String[] args) {
         Universo universo = new Universo();
@@ -52,6 +58,7 @@ public class Main {
         escenarioB(universo, carguero.getId());
         escenarioC(universo, combate.getId());
         escenarioD(universo, exploradora.getId());
+        escenarioE(universo, exploradora.getId());
     }
 
     // ===================== ESCENARIO A: ejecucion correcta =====================
@@ -135,6 +142,30 @@ public class Main {
         }
 
         mostrarRecursos("Despues (sin cambios)", asistente);
+    }
+
+    // ============== ESCENARIO E: liquidacion de haberes (E1-08) ==============
+    private static void escenarioE(Universo universo, int idNave) {
+        titulo("ESCENARIO E - Liquidacion de haberes");
+        // Tripulacion asignada a la nave en el escenario A: cubre los 4 cargos y los 3 origenes
+        List<Tripulante> tripulantes = universo.obtener(idNave).getTripulantes();
+        System.out.println("Consejos registrados en el periodo (solo para el consejero): " + CONSEJOS_DEL_PERIODO);
+
+        for (Tripulante tripulante : tripulantes) {
+            ComponenteHaber haber = LiquidadorHaberes.liquidar(tripulante, CONSEJOS_DEL_PERIODO);
+            System.out.println(tripulante.getNombre() + " - " + tripulante.getCargo() + ", "
+                    + tripulante.getOrigen() + ", " + tripulante.getAntiguedad() + " anios");
+            mostrarConceptos(haber);
+            System.out.println("   TOTAL: " + haber.getImporte() + " PG");
+        }
+    }
+
+    // Recorre la cadena de decoradores desde el haber base hacia afuera, un concepto por linea
+    private static void mostrarConceptos(ComponenteHaber haber) {
+        if (haber.getInterno() != null) {
+            mostrarConceptos(haber.getInterno());
+        }
+        System.out.println("   " + haber.getConcepto() + ": " + haber.getAporte() + " PG");
     }
 
     // ===================== AUXILIARES DE LA DEMOSTRACION =====================
