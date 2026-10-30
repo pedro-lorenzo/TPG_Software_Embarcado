@@ -1,6 +1,5 @@
 package unmdp.fi.programacionc.nave;
 
-import unmdp.fi.programacionc.comando.Asistente;
 import unmdp.fi.programacionc.comando.AsistenteComando;
 import unmdp.fi.programacionc.motor.MotorWarp;
 import unmdp.fi.programacionc.recursos.Tanque;
@@ -57,21 +56,27 @@ public final class NaveFactory {
     private static Nave crearExploradora(int id) {
         Tanque tanque = new Tanque(NaveExploradora.COMBUSTIBLE_INICIAL, NaveExploradora.ENERGIA_INICIAL);
         MotorWarp motor = new MotorWarp();
-        Asistente asistente = new AsistenteComando(tanque, motor);
-        return new NaveExploradora(id, tanque, motor, asistente);
+        AsistenteComando asistente = new AsistenteComando(tanque, motor);
+        Nave nave = new NaveExploradora(id, tanque, motor, asistente);
+        asistente.asignarCombatiente(nave);
+        return nave;
     }
 
     private static Nave crearCarguero(int id) {
         Tanque tanque = new Tanque(NaveCarguero.COMBUSTIBLE_INICIAL, NaveCarguero.ENERGIA_INICIAL);
         MotorWarp motor = new MotorWarp();
-        Asistente asistente = new AsistenteComando(tanque, motor);
-        return new NaveCarguero(id, tanque, motor, asistente);
+        AsistenteComando asistente = new AsistenteComando(tanque, motor);
+        Nave nave = new NaveCarguero(id, tanque, motor, asistente);
+        asistente.asignarCombatiente(nave);
+        return nave;
     }
 
     private static Nave crearCombate(int id) {
         Tanque tanque = new Tanque(NaveCombate.COMBUSTIBLE_INICIAL, NaveCombate.ENERGIA_INICIAL);
         MotorWarp motor = new MotorWarp();
-        Asistente asistente = new AsistenteComando(tanque, motor);
-        return new NaveCombate(id, tanque, motor, asistente);
+        AsistenteComando asistente = new AsistenteComando(tanque, motor);
+        Nave nave = new NaveCombate(id, tanque, motor, asistente);
+        asistente.asignarCombatiente(nave);
+        return nave;
     }
 }

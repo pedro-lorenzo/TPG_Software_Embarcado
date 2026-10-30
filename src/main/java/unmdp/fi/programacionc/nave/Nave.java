@@ -4,6 +4,7 @@ import unmdp.fi.programacionc.comando.Asistente;
 import unmdp.fi.programacionc.motor.MotorWarp;
 import unmdp.fi.programacionc.recursos.Tanque;
 import unmdp.fi.programacionc.tripulacion.Tripulante;
+import unmdp.fi.programacionc.tablero.Combatiente;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,7 +23,7 @@ import java.util.List;
  * inv -> tipo != null
  * inv -> tanque, motor y asistente != null
  */
-public abstract class Nave {
+public abstract class Nave implements Combatiente {
 
     private final int id;
     private final TipoNave tipo;

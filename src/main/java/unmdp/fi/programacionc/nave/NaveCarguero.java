@@ -3,6 +3,8 @@ package unmdp.fi.programacionc.nave;
 import unmdp.fi.programacionc.comando.Asistente;
 import unmdp.fi.programacionc.motor.MotorWarp;
 import unmdp.fi.programacionc.recursos.Tanque;
+import unmdp.fi.programacionc.tablero.NaveEnemiga;
+import unmdp.fi.programacionc.tablero.ResultadoBatalla;
 
 /**
  * Nave carguero. En E1 se diferencia por su configuracion inicial (Ficha de Inicio E1).
@@ -16,5 +18,10 @@ public class NaveCarguero extends Nave {
     // Package-private: solo la fabrica (mismo paquete) puede crear naves
     NaveCarguero(int id, Tanque tanque, MotorWarp motor, Asistente asistente) {
         super(id, TipoNave.CARGUERO, tanque, motor, asistente);
+    }
+
+    @Override
+    public ResultadoBatalla enfrentar(NaveEnemiga enemiga) {
+        return enemiga.recibirDeCarguero();
     }
 }

@@ -6,6 +6,9 @@ import unmdp.fi.programacionc.bitacora.TipoEvento;
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 import unmdp.fi.programacionc.motor.MotorWarp;
 import unmdp.fi.programacionc.recursos.Tanque;
+import unmdp.fi.programacionc.tablero.Combatiente;
+import unmdp.fi.programacionc.tablero.NaveEnemiga;
+import unmdp.fi.programacionc.tablero.ResultadoBatalla;
 
 import java.util.List;
 
@@ -30,6 +33,7 @@ public class AsistenteComando implements Asistente {
     private final Tanque tanque;
     private final MotorWarp motor;
     private final Bitacora bitacora;
+    private Combatiente combatiente;
 
     /**
      * Lo crea la fabrica de naves, que le pasa los componentes de la nave que va a operar.
@@ -60,6 +64,27 @@ public class AsistenteComando implements Asistente {
     /** Eventos en orden temporal. La lista no se puede modificar y los eventos son inmutables. */
     @Override
     public List<EventoBitacora> getEventos()  { return bitacora.getEventos(); }
+
+    /**
+     * Lo llama la fabrica una sola vez, al armar la nave.
+     * pre -> combatiente != null
+     * pre -> todavia no tiene uno asignado
+     */
+    public void asignarCombatiente(Combatiente combatiente) {
+        assert combatiente != null : "El combatiente no puede ser nulo";
+        assert this.combatiente == null : "El asistente ya tiene un combatiente asignado";
+        this.combatiente = combatiente;
+    }
+
+    /**
+     * pre -> la fabrica ya asigno el combatiente
+     * pre -> enemiga != null
+     */
+    public ResultadoBatalla enfrentar(NaveEnemiga enemiga) {
+        assert combatiente != null : "El asistente no tiene combatiente asignado";
+        assert enemiga != null : "La nave enemiga no puede ser nula";
+        return combatiente.enfrentar(enemiga);
+    }
 
     // ===================== ORDENES AL MOTOR =====================
     // Todas siguen los mismos pasos: anotar el estado antes, delegar en el motor
