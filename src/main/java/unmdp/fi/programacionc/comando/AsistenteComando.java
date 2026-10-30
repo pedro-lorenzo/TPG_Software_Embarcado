@@ -9,6 +9,8 @@ import unmdp.fi.programacionc.recursos.Tanque;
 import unmdp.fi.programacionc.tablero.Combatiente;
 import unmdp.fi.programacionc.tablero.NaveEnemiga;
 import unmdp.fi.programacionc.tablero.ResultadoBatalla;
+import unmdp.fi.programacionc.tablero.Coordenada;
+import unmdp.fi.programacionc.tripulacion.Tripulante;
 
 import java.util.List;
 
@@ -30,10 +32,18 @@ import java.util.List;
  */
 public class AsistenteComando implements Asistente {
 
+    /** Combustible que se obtiene al canjear una gema. */
+    public static final int COMBUSTIBLE_POR_GEMA = 5;
+
     private final Tanque tanque;
     private final MotorWarp motor;
     private final Bitacora bitacora;
     private Combatiente combatiente;
+    private final List<Tripulante> tripulantes;   // solo lectura: la duena de la lista es la Nave
+    private Coordenada posicion;                  // arranca en la posicion inicial que le da la fabrica
+    private int gemas = 0;
+    private boolean destruida = false;
+    private String motivoDestruccion;
 
     /**
      * Lo crea la fabrica de naves, que le pasa los componentes de la nave que va a operar.
@@ -41,11 +51,15 @@ public class AsistenteComando implements Asistente {
      * pre -> motor != null
      * post -> el asistente tiene una bitacora propia y vacia (salvo el evento de inicio)
      */
-    public AsistenteComando(Tanque tanque, MotorWarp motor) {
+    public AsistenteComando(Tanque tanque, MotorWarp motor, List<Tripulante> tripulantes, Coordenada posicionInicial) {
         assert tanque != null : "El asistente necesita el tanque de la nave";
         assert motor != null : "El asistente necesita el motor de la nave";
+        assert tripulantes != null : "El asistente necesita la tripulacion de la nave";
+        assert posicionInicial != null : "La nave necesita una posicion inicial";
         this.tanque = tanque;
         this.motor = motor;
+        this.tripulantes = tripulantes;
+        this.posicion = posicionInicial;
         this.bitacora = new Bitacora();
         this.bitacora.registrar(TipoEvento.SISTEMA, "Asistente de comando iniciado. " + estadoRecursos()
                 + ", motor " + motor.getEstadoActual());
@@ -53,7 +67,8 @@ public class AsistenteComando implements Asistente {
 
     // ===================== CONSULTAS =====================
 
-    @Override public boolean estaDisponible() { return motor.estaDisponible(); }
+    /** Una nave destruida nunca esta disponible. */
+    @Override public boolean estaDisponible() { return !destruida && motor.estaDisponible(); }
     @Override public String getEstadoMotor()  { return motor.getEstadoActual(); }
     @Override public int getCombustible()     { return tanque.getCombustible(); }
     @Override public int getEnergia()         { return tanque.getEnergia(); }
@@ -77,9 +92,23 @@ public class AsistenteComando implements Asistente {
     }
 
     /**
+     * pre -> la nave ya tiene una posicion asignada
+     */
+    @Override
+    public Coordenada getPosicion() {
+        assert posicion != null : "La nave todavia no fue ubicada en el tablero";
+        return posicion;
+    }
+
+    @Override public boolean estaDestruida() { return destruida; }
+    public String getMotivoDestruccion()      { return motivoDestruccion; }
+    @Override public int getGemas()           { return gemas; }
+
+    /**
      * pre -> la fabrica ya asigno el combatiente
      * pre -> enemiga != null
      */
+    @Override
     public ResultadoBatalla enfrentar(NaveEnemiga enemiga) {
         assert combatiente != null : "El asistente no tiene combatiente asignado";
         assert enemiga != null : "La nave enemiga no puede ser nula";
@@ -240,6 +269,104 @@ public class AsistenteComando implements Asistente {
         String antes = estadoRecursos();
         tanque.realizarMantenimiento();
         registrarCambioRecursos("realizar mantenimiento", antes);
+    }
+
+    // ===================== NAVEGACION, GEMAS Y DESTRUCCION =====================
+
+    /**
+     * La primera llamada ubica a la nave; las siguientes la mueven. No consume recursos:
+     * el costo del viaje lo descuenta la mision.
+     * pre -> destino != null
+     * pre -> la nave no esta destruida
+     * post -> getPosicion() equals destino
+     */
+    @Override
+    public void moverA(Coordenada destino) {
+        assert destino != null : "El destino no puede ser nulo";
+        assert !destruida : "Una nave destruida no se mueve";
+        String antes = posicion == null ? "sin ubicar" : posicion.toString();
+        posicion = destino;
+        bitacora.registrar(TipoEvento.SISTEMA, "Posicion: " + antes + " -> " + destino);
+    }
+
+    /**
+     * pre -> cantidad > 0
+     * post -> getGemas() aumenta en cantidad
+     */
+    @Override
+    public void agregarGemas(int cantidad) {
+        assert cantidad > 0 : "La cantidad de gemas debe ser positiva";
+        gemas += cantidad;
+        bitacora.registrar(TipoEvento.RECURSOS, "Gemas recolectadas: +" + cantidad + " (total " + gemas + ")");
+    }
+
+    /**
+     * Cierre de la mision: las gemas pasan a ser combustible. Lo que no entra en el tanque se pierde.
+     * post -> getGemas() == 0
+     */
+    @Override
+    public void canjearGemas() {
+        int canjeadas = gemas;
+        int equivalente = canjeadas * COMBUSTIBLE_POR_GEMA;
+        int cargable = Math.min(equivalente, Tanque.TOPE_COMBUSTIBLE - tanque.getCombustible());
+        gemas = 0;
+        if (cargable > 0) {
+            cargarCombustible(cargable);
+        }
+        bitacora.registrar(TipoEvento.RECURSOS, "Canje de " + canjeadas + " gemas: +" + cargable
+                + " de combustible" + (equivalente > cargable ? " (" + (equivalente - cargable)
+                + " no entraron en el tanque)" : ""));
+    }
+
+    // ---- NavePropia: lo que los elementos del tablero le hacen a la nave ----
+
+    /**
+     * Descuenta energia sin pasarse de la que hay. Si queda en 0, la nave queda destruida.
+     * pre -> energia > 0
+     */
+    @Override
+    public void recibirImpactoDeEnergia(int energia) {
+        assert energia > 0 : "El impacto debe ser positivo";
+        int descontada = Math.min(energia, tanque.getEnergia());
+        if (descontada > 0) {
+            consumir(0, descontada, 0);
+        }
+        if (tanque.getEnergia() == 0) {
+            destruir("sin energia tras el impacto");
+        }
+    }
+
+    /**
+     * Recarga hasta el tope de cada tanque, sin pasarse.
+     * pre -> combustible >= 0 y energia >= 0
+     */
+    @Override
+    public void recargar(int combustible, int energia) {
+        assert combustible >= 0 && energia >= 0 : "Las recargas no pueden ser negativas";
+        int c = Math.min(combustible, Tanque.TOPE_COMBUSTIBLE - tanque.getCombustible());
+        int e = Math.min(energia, Tanque.TOPE_ENERGIA - tanque.getEnergia());
+        if (c > 0) {
+            cargarCombustible(c);
+        }
+        if (e > 0) {
+            cargarEnergia(e);
+        }
+    }
+
+    /**
+     * Si la nave ya estaba destruida no hace nada (un mismo turno puede destruirla dos veces).
+     * pre -> motivo no nulo ni vacio
+     * post -> estaDestruida() == true
+     */
+    @Override
+    public void destruir(String motivo) {
+        assert motivo != null && !motivo.trim().isEmpty() : "El motivo no puede ser nulo ni vacio";
+        if (destruida) {
+            return;
+        }
+        destruida = true;
+        motivoDestruccion = motivo;
+        bitacora.registrar(TipoEvento.ERROR, "Nave destruida: " + motivo);
     }
 
     // ===================== REGISTRO =====================
