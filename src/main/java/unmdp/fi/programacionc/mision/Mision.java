@@ -76,19 +76,37 @@ public abstract class Mision {
             motivo = e.getMessage();
             asistente.registrarEvento(TipoEvento.ERROR, codigo + " rechazada: " + motivo);
         }
+        // Informe (Aclaracion R5): consumos del recorrido, medidos despues de evaluar y antes de cerrar
+        int combustibleConsumido = combustibleInicial - asistente.getCombustible();
+        int energiaConsumida = energiaInicial - asistente.getEnergia();
+        int desgasteProducido = asistente.getDesgaste() - desgasteInicial;
+
+        // Cierre: impacta el estado; su balance es la diferencia de antes y despues de cerrar()
+        int combustibleAntes = asistente.getCombustible();
+        int energiaAntes = asistente.getEnergia();
+        int desgasteAntes = asistente.getDesgaste();
+        int gemasAntes = asistente.getGemas();
         cerrar(resultado, motivo);
 
-        // Informe de la mision (Aclaracion R5): la bitacora es el informe
         asistente.registrarEvento(TipoEvento.MISION, codigo + " informe: " + nombre
                 + " | resultado=" + resultado
-                + " | combustible consumido=" + (combustibleInicial - asistente.getCombustible())
-                + " | energia consumida=" + (energiaInicial - asistente.getEnergia())
-                + " | desgaste producido=" + (asistente.getDesgaste() - desgasteInicial)
+                + " | combustible consumido=" + combustibleConsumido
+                + " | energia consumida=" + energiaConsumida
+                + " | desgaste producido=" + desgasteProducido
+                + " | cierre: combustible " + signado(asistente.getCombustible() - combustibleAntes)
+                + ", energía " + signado(asistente.getEnergia() - energiaAntes)
+                + ", desgaste " + signado(asistente.getDesgaste() - desgasteAntes)
+                + ", gemas " + signado(asistente.getGemas() - gemasAntes)
                 + " | motor=" + asistente.getEstadoMotor()
                 + " | observaciones=" + (motivo == null ? "ninguna" : motivo));
 
         this.finalizada = true;
         return resultado;
+    }
+
+    /** Formatea una diferencia con signo explicito (+N, -N, +0). */
+    private static String signado(int valor) {
+        return (valor >= 0 ? "+" : "") + valor;
     }
 
     // ===================== PASOS COMUNES =====================
