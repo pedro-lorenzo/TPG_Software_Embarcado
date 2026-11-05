@@ -2,6 +2,8 @@ package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.bitacora.TipoEvento;
 
+import java.util.Random;
+
 /**
  * M-02 Recoleccion. Version simplificada de E1: su accion es simulada
  * (Aclaracion R4); el contenido real de la mision se define en E2.
@@ -9,13 +11,27 @@ import unmdp.fi.programacionc.bitacora.TipoEvento;
 public class MisionRecoleccion extends Mision {
 
     private static final int COMBUSTIBLE_REQUERIDO = 4;
-    private static final int ENERGIA_REQUERIDA = 5;
+    private static final int ENERGIA_REQUERIDA = 10;
+    private static final int GEMAS_MINIMAS = 20;
+    private static final int GEMAS_MAXIMAS = 100;
+
+    private final Random azar;
 
     /**
      * pre -> asistente != null (lo verifica Mision)
      */
     public MisionRecoleccion(OperadorMision asistente) {
+        this(asistente, new Random());
+    }
+
+    /**
+     * pre -> asistente != null (lo verifica Mision)
+     * pre -> azar != null
+     */
+    public MisionRecoleccion(OperadorMision asistente, Random azar) {
         super("M-02", "Recoleccion", "Llegar al punto simulado y obtener datos o muestra", asistente);
+        assert azar != null : "El generador aleatorio no puede ser nulo";
+        this.azar = azar;
     }
 
     @Override
@@ -34,7 +50,7 @@ public class MisionRecoleccion extends Mision {
      */
     @Override
     protected ResultadoMision evaluar() {
-        return getAsistente().estaDisponible() ? ResultadoMision.EXITOSA : ResultadoMision.FALLIDA;
+        return !getAsistente().estaDestruida() ? ResultadoMision.EXITOSA : ResultadoMision.FALLIDA;
     }
 
     @Override
@@ -43,6 +59,8 @@ public class MisionRecoleccion extends Mision {
         switch (resultado) {
             case EXITOSA:
                 mensaje = "muestra registrada como obtenida";
+                getAsistente().agregarGemas(GEMAS_MINIMAS + azar.nextInt(GEMAS_MAXIMAS - GEMAS_MINIMAS + 1));
+                getAsistente().canjearGemas();
                 break;
             case FALLIDA:
                 mensaje = "no se pudo registrar la muestra";

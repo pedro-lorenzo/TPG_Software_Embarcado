@@ -2,13 +2,17 @@ package unmdp.fi.programacionc.motor;
 
 /**
  * Estado "Preparando salto".
- * Accion valida: saltar -> En warp.
+ * saltar: salto simple; si hay energia para el warp -> Warp, si no se queda.
  */
 public class PreparandoSalto implements EstadoMotor {
 
     @Override
-    public void saltar(MotorWarp motor) {
-        motor.setEstado(new Warp());
+    public int saltar(MotorWarp motor) {
+        int avanzados = motor.avanzarUnCasillero();
+        if (motor.hayEnergiaParaWarp()) {
+            motor.setEstado(new Warp());
+        }
+        return avanzados;
     }
 
     @Override

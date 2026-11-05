@@ -32,7 +32,7 @@ import java.util.List;
 public class AsistenteComando implements Asistente {
 
     /** Combustible que se obtiene al canjear una gema. */
-    public static final int COMBUSTIBLE_POR_GEMA = 5;
+    public static final int COMBUSTIBLE_POR_GEMA = 1;
 
     private final Tanque tanque;
     private final MotorWarp motor;
@@ -104,92 +104,53 @@ public class AsistenteComando implements Asistente {
     }
 
     // ===================== ORDENES AL MOTOR =====================
-    // Todas siguen los mismos pasos: anotar el estado antes, delegar en el motor
-    // (el estado actual decide si la transicion es valida) y registrar el cambio o el error.
+    // Anotar estado y recursos antes, delegar en el motor (el estado actual decide la transicion)
+    // y registrar el cambio (salto simple o warp) o el rechazo.
 
     /**
-     * Disponible -> Preparando salto.
-     * @throws OperacionInvalidaException si el estado actual no lo permite (queda registrado)
+     * Salto simple: el estado del motor decide la transicion.
+     * pre -> la nave no esta destruida
+     * @return casilleros avanzados
+     * @throws OperacionInvalidaException si no alcanza el combustible (queda registrado)
      */
     @Override
-    public void prepararSalto() {
-        String accion = "preparar salto";
-        String antes = motor.getEstadoActual();
-        try {
-            motor.prepararSalto();
-        } catch (OperacionInvalidaException e) {
-            registrarError(accion, e);
-            throw e;
-        }
-        registrarCambioMotor(accion, antes);
+    public int saltar() {
+        return ordenarSalto("saltar", false);
     }
 
     /**
-     * Preparando salto -> En warp.
-     * @throws OperacionInvalidaException si el estado actual no lo permite (queda registrado)
+     * Salto warp si el motor esta en Warp; en los demas estados el motor hace el salto simple.
+     * pre -> la nave no esta destruida
+     * @return casilleros avanzados
+     * @throws OperacionInvalidaException si no alcanza el combustible (queda registrado)
      */
     @Override
-    public void saltar() {
-        String accion = "saltar";
-        String antes = motor.getEstadoActual();
-        try {
-            motor.saltar();
-        } catch (OperacionInvalidaException e) {
-            registrarError(accion, e);
-            throw e;
-        }
-        registrarCambioMotor(accion, antes);
+    public int saltarWarp() {
+        return ordenarSalto("saltar warp", true);
     }
 
-    /**
-     * En warp -> Disponible (aclaracion R3: por ahora no se modela el paso del tiempo).
-     * @throws OperacionInvalidaException si el estado actual no lo permite (queda registrado)
-     */
-    @Override
-    public void finalizarSalto() {
-        String accion = "finalizar salto";
-        String antes = motor.getEstadoActual();
+    private int ordenarSalto(String accion, boolean warp) {
+        assert !destruida : "Una nave destruida no salta";
+        String estadoAntes = motor.getEstadoActual();
+        String recursosAntes = estadoRecursos();
+        int avanzados;
         try {
-            motor.finalizarSalto();
+            avanzados = warp ? motor.saltarWarp() : motor.saltar();
         } catch (OperacionInvalidaException e) {
             registrarError(accion, e);
             throw e;
         }
-        registrarCambioMotor(accion, antes);
-    }
-
-    /**
-     * En warp -> Enfriamiento.
-     * @throws OperacionInvalidaException si el estado actual no lo permite (queda registrado)
-     */
-    @Override
-    public void enfriar() {
-        String accion = "enfriar";
-        String antes = motor.getEstadoActual();
-        try {
-            motor.enfriar();
-        } catch (OperacionInvalidaException e) {
-            registrarError(accion, e);
-            throw e;
+        String estadoDespues = motor.getEstadoActual();
+        String tipo = avanzados == 2 ? "salto warp" : "salto simple";
+        bitacora.registrar(TipoEvento.MOTOR, accion + " (" + tipo + ", avanza " + avanzados + "): "
+                + estadoAntes + " -> " + estadoDespues);
+        if (warp && estadoAntes.equals("En warp") && avanzados == 1) {
+            bitacora.registrar(TipoEvento.MOTOR, "Salto warp abortado por energia insuficiente: "
+                    + "se hizo el salto simple y el motor vuelve a " + estadoDespues);
         }
-        registrarCambioMotor(accion, antes);
-    }
-
-    /**
-     * Enfriamiento -> Disponible.
-     * @throws OperacionInvalidaException si el estado actual no lo permite (queda registrado)
-     */
-    @Override
-    public void completarEnfriamiento() {
-        String accion = "completar enfriamiento";
-        String antes = motor.getEstadoActual();
-        try {
-            motor.completarEnfriamiento();
-        } catch (OperacionInvalidaException e) {
-            registrarError(accion, e);
-            throw e;
-        }
-        registrarCambioMotor(accion, antes);
+        registrarCambioRecursos(accion, recursosAntes);
+        revisarAgotamiento();
+        return avanzados;
     }
 
     // ===================== ORDENES SOBRE RECURSOS =====================
@@ -212,6 +173,7 @@ public class AsistenteComando implements Asistente {
             throw e;
         }
         registrarCambioRecursos(accion, antes);
+        revisarAgotamiento();
     }
 
     /**
@@ -272,6 +234,13 @@ public class AsistenteComando implements Asistente {
         bitacora.registrar(TipoEvento.RECURSOS, "Gemas recolectadas: +" + cantidad + " (total " + gemas + ")");
     }
 
+    @Override
+    public void recargarTotal() {
+        String antes = estadoRecursos();
+        tanque.recargarHastaTope(Tanque.TOPE_COMBUSTIBLE, Tanque.TOPE_ENERGIA);
+        registrarCambioRecursos("recarga total de combustible y energia", antes);
+    }
+
     /**
      * Cierre de la mision: las gemas pasan a ser combustible. Lo que no entra en el tanque se pierde.
      * post -> getGemas() == 0
@@ -293,19 +262,16 @@ public class AsistenteComando implements Asistente {
     // ---- NavePropia: lo que los elementos del tablero le hacen a la nave ----
 
     /**
-     * Descuenta energia sin pasarse de la que hay. Si queda en 0, la nave queda destruida.
+     * El tanque descuenta la energia sin pasarse de la que hay. Si la nave queda agotada, se destruye.
      * pre -> energia > 0
      */
     @Override
     public void recibirImpactoDeEnergia(int energia) {
         assert energia > 0 : "El impacto debe ser positivo";
-        int descontada = Math.min(energia, tanque.getEnergia());
-        if (descontada > 0) {
-            consumir(0, descontada, 0);
-        }
-        if (tanque.getEnergia() == 0) {
-            destruir("sin energia tras el impacto");
-        }
+        String antes = estadoRecursos();
+        tanque.recibirDanio(energia);
+        registrarCambioRecursos("recibir impacto de " + energia + " de energia", antes);
+        revisarAgotamiento();
     }
 
     /**
@@ -315,14 +281,10 @@ public class AsistenteComando implements Asistente {
     @Override
     public void recargar(int combustible, int energia) {
         assert combustible >= 0 && energia >= 0 : "Las recargas no pueden ser negativas";
-        int c = Math.min(combustible, Tanque.TOPE_COMBUSTIBLE - tanque.getCombustible());
-        int e = Math.min(energia, Tanque.TOPE_ENERGIA - tanque.getEnergia());
-        if (c > 0) {
-            cargarCombustible(c);
-        }
-        if (e > 0) {
-            cargarEnergia(e);
-        }
+        String antes = estadoRecursos();
+        tanque.recargarHastaTope(combustible, energia);
+        registrarCambioRecursos("recargar " + combustible + " de combustible y " + energia + " de energia", antes);
+        revisarAgotamiento();
     }
 
     /**
@@ -338,7 +300,14 @@ public class AsistenteComando implements Asistente {
         }
         destruida = true;
         motivoDestruccion = motivo;
-        bitacora.registrar(TipoEvento.ERROR, "Nave destruida: " + motivo);
+        int muertos = 0;
+        for (Tripulante t : tripulantes) {
+            if (!t.estaFallecido()) {
+                t.marcarFallecido();
+                muertos++;
+            }
+        }
+        bitacora.registrar(TipoEvento.ERROR, "Nave destruida: " + motivo + ". Tripulantes fallecidos: " + muertos);
     }
 
     // ===================== REGISTRO =====================
@@ -357,13 +326,16 @@ public class AsistenteComando implements Asistente {
         bitacora.registrar(TipoEvento.ERROR, "Orden rechazada (" + accion + "): " + e.getMessage());
     }
 
-    private void registrarCambioMotor(String accion, String estadoAntes) {
-        bitacora.registrar(TipoEvento.MOTOR, accion + ": " + estadoAntes + " -> " + motor.getEstadoActual());
-    }
-
     private void registrarCambioRecursos(String accion, String recursosAntes) {
         bitacora.registrar(TipoEvento.RECURSOS, accion + ". Antes: " + recursosAntes
                 + ". Despues: " + estadoRecursos());
+    }
+
+    /** La nave se destruye con desgaste maximo, energia 0 o combustible 0 (lo decide Tanque). */
+    private void revisarAgotamiento() {
+        if (!destruida && tanque.estaAgotado()) {
+            destruir("recursos agotados (" + estadoRecursos() + ")");
+        }
     }
 
     private String estadoRecursos() {

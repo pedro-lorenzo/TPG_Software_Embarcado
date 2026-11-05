@@ -8,6 +8,7 @@ import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 import unmdp.fi.programacionc.haberes.ComponenteHaber;
 import unmdp.fi.programacionc.haberes.LiquidadorHaberes;
 import unmdp.fi.programacionc.mision.Mision;
+import unmdp.fi.programacionc.motor.MotorWarp;
 import unmdp.fi.programacionc.mision.MisionIntercepcion;
 import unmdp.fi.programacionc.mision.MisionRecoleccion;
 import unmdp.fi.programacionc.mision.MisionRetornoSeguro;
@@ -108,23 +109,27 @@ public class Main {
         Asistente asistente = universo.obtener(idNave).getAsistente();
         System.out.println("Estado inicial: " + asistente.getEstadoMotor());
 
-        asistente.prepararSalto();
-        System.out.println("-> " + asistente.getEstadoMotor());
-        asistente.saltar();
-        System.out.println("-> " + asistente.getEstadoMotor());
-        asistente.enfriar();
-        System.out.println("-> " + asistente.getEstadoMotor());
-        asistente.completarEnfriamiento();
-        System.out.println("-> " + asistente.getEstadoMotor());
+        // Disponible -> Preparando salto -> Warp (la segunda vez hay energia para el warp)
+        mostrarSalto(asistente, "saltar", asistente.saltar());
+        mostrarSalto(asistente, "saltar", asistente.saltar());
+        // Warp -> salto warp (avanza 2) -> Enfriamiento
+        mostrarSalto(asistente, "saltarWarp", asistente.saltarWarp());
+        // Enfriamiento -> un turno de salto simple con desgaste -> Disponible
+        mostrarSalto(asistente, "saltar (enfriamiento)", asistente.saltar());
+        // saltarWarp fuera de Warp no se rechaza: hace el salto normal
+        mostrarSalto(asistente, "saltarWarp fuera de Warp", asistente.saltarWarp());
 
-        // Transicion invalida: no hay "saltar" desde Disponible
+        // Combustible insuficiente: se rechaza y el estado no cambia
+        int sobrante = asistente.getCombustible() - (MotorWarp.COMBUSTIBLE_SALTO - 1);
+        asistente.consumir(sobrante, 0, 0);
+        String estadoAntes = asistente.getEstadoMotor();
         try {
             asistente.saltar();
-            System.out.println("ERROR: la transicion invalida no fue rechazada");
+            System.out.println("ERROR: el salto sin combustible no fue rechazado");
         } catch (OperacionInvalidaException e) {
             System.out.println("Rechazada: " + e.getMessage());
         }
-        System.out.println("Estado final: " + asistente.getEstadoMotor());
+        System.out.println("Estado final: " + asistente.getEstadoMotor() + " (antes del rechazo: " + estadoAntes + ")");
         mostrarBitacora(asistente);
     }
 
@@ -189,6 +194,12 @@ public class Main {
     private static void mostrarRecursos(String etiqueta, Asistente a) {
         System.out.println(etiqueta + ": combustible " + a.getCombustible() + ", energia " + a.getEnergia()
                 + ", desgaste " + a.getDesgaste() + ", motor " + a.getEstadoMotor());
+    }
+
+    private static void mostrarSalto(Asistente a, String orden, int avanzados) {
+        System.out.println(orden + " -> avanzo " + avanzados + " casillero(s), motor " + a.getEstadoMotor()
+                + ", combustible " + a.getCombustible() + ", energia " + a.getEnergia()
+                + ", desgaste " + a.getDesgaste());
     }
 
     private static void mostrarBitacora(Asistente a) {

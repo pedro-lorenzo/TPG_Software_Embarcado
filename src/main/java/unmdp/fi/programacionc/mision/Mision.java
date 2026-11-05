@@ -50,7 +50,7 @@ public abstract class Mision {
 
     /**
      * Ciclo completo de la mision.
-     * Si la preparacion falla (motor no disponible, mantenimiento pendiente o recursos insuficientes)
+     * Si la preparacion falla (nave destruida, mantenimiento pendiente o recursos insuficientes)
      * no se ejecuta ni se evalua: la mision se cierra como RECHAZADA y la nave no se modifica.
      * Cualquier otra excepcion no es un caso esperado y se propaga a quien ejecuto la mision.
      *
@@ -105,11 +105,10 @@ public abstract class Mision {
     private void preparar() {
         asistente.registrarEvento(TipoEvento.MISION, codigo + ": preparando mision");
 
-        if (!asistente.estaDisponible()) {
-            throw new MisionNoEjecutableException(
-                    "el motor no esta disponible (estado: " + asistente.getEstadoMotor() + ")");
+        if (asistente.estaDestruida()) {
+            throw new MisionNoEjecutableException("la nave esta destruida");
         }
-        if (asistente.necesitaMantenimiento()) {
+        if (requiereMantenimientoAlDia() && asistente.necesitaMantenimiento()) {
             throw new MisionNoEjecutableException(
                     "la nave requiere mantenimiento (desgaste " + asistente.getDesgaste() + ")");
         }
@@ -127,16 +126,13 @@ public abstract class Mision {
 
     /**
      * Consume los requisitos de la mision y realiza el salto (Aclaracion R4).
-     * Como todavia no se modela el paso del tiempo, el salto termina y el motor vuelve
-     * a Disponible (Aclaracion R3).
+     * El salto es un salto simple del motor; su estado queda donde lo deje la transicion.
      *
      * pre -> preparar() termino sin excepcion (lo garantiza el template)
      */
     private void ejecutar() {
         asistente.consumir(getCombustibleRequerido(), getEnergiaRequerida(), DESGASTE_PRODUCIDO);
-        asistente.prepararSalto();
         asistente.saltar();
-        asistente.finalizarSalto();
         asistente.registrarEvento(TipoEvento.MISION, codigo + ": " + descripcion);
     }
 
@@ -153,6 +149,13 @@ public abstract class Mision {
      * post -> resultado >= 0
      */
     protected abstract int getEnergiaRequerida();
+
+    /**
+     * Si es true (por defecto), la mision se rechaza cuando la nave necesita mantenimiento.
+     */
+    protected boolean requiereMantenimientoAlDia() {
+        return true;
+    }
 
     /**
      * Revisa la condicion de exito propia de la mision.

@@ -59,7 +59,7 @@ public final class NaveFactory {
 
     private static Nave crearExploradora(int id) {
         Tanque tanque = new Tanque(NaveExploradora.COMBUSTIBLE_INICIAL, NaveExploradora.ENERGIA_INICIAL);
-        MotorWarp motor = new MotorWarp();
+        MotorWarp motor = new MotorWarp(tanque);
         List<Tripulante> tripulantes = new ArrayList<>();
         AsistenteComando asistente = new AsistenteComando(tanque, motor,
                 Collections.unmodifiableList(tripulantes));
@@ -70,7 +70,7 @@ public final class NaveFactory {
 
     private static Nave crearCarguero(int id) {
         Tanque tanque = new Tanque(NaveCarguero.COMBUSTIBLE_INICIAL, NaveCarguero.ENERGIA_INICIAL);
-        MotorWarp motor = new MotorWarp();
+        MotorWarp motor = new MotorWarp(tanque);
         List<Tripulante> tripulantes = new ArrayList<>();
         AsistenteComando asistente = new AsistenteComando(tanque, motor,
                 Collections.unmodifiableList(tripulantes));
@@ -81,7 +81,7 @@ public final class NaveFactory {
 
     private static Nave crearCombate(int id) {
         Tanque tanque = new Tanque(NaveCombate.COMBUSTIBLE_INICIAL, NaveCombate.ENERGIA_INICIAL);
-        MotorWarp motor = new MotorWarp();
+        MotorWarp motor = new MotorWarp(tanque);
         List<Tripulante> tripulantes = new ArrayList<>();
         AsistenteComando asistente = new AsistenteComando(tanque, motor,
                 Collections.unmodifiableList(tripulantes));

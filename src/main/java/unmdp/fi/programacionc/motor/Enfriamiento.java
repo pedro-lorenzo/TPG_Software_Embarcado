@@ -1,14 +1,16 @@
 package unmdp.fi.programacionc.motor;
 
 /**
- * Estado "Enfriamiento". Existe aunque las misiones todavia no lo usen (Aclaracion R3).
- * Accion valida: completarEnfriamiento -> Disponible.
+ * Estado "Enfriamiento" (tras un salto warp).
+ * saltar: salto simple mas DESGASTE_ENFRIAMIENTO de desgaste -> Disponible.
  */
 public class Enfriamiento implements EstadoMotor {
 
     @Override
-    public void completarEnfriamiento(MotorWarp motor) {
+    public int saltar(MotorWarp motor) {
+        int avanzados = motor.avanzarUnCasilleroCobrandoEnfriamiento();
         motor.setEstado(new Disponible());
+        return avanzados;
     }
 
     @Override

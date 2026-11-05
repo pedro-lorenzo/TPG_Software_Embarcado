@@ -27,9 +27,18 @@ public interface OperadorMision {
 
     // ---- ordenes (lanzan OperacionInvalidaException si la nave las rechaza) ----
     void consumir(int combustible, int energia, int desgaste);
-    void prepararSalto();
-    void saltar();
-    void finalizarSalto();
+    /**
+     * Salto simple del motor.
+     * @return casilleros avanzados
+     * @throws unmdp.fi.programacionc.excepciones.OperacionInvalidaException si no alcanza el combustible
+     */
+    int saltar();
+    /**
+     * Salto warp si el motor esta listo; en cualquier otro estado hace el salto simple.
+     * @return casilleros avanzados
+     * @throws unmdp.fi.programacionc.excepciones.OperacionInvalidaException si no alcanza el combustible
+     */
+    int saltarWarp();
     /**
      * pre -> cantidad > 0
      */
@@ -41,6 +50,17 @@ public interface OperadorMision {
      * post -> getGemas() == 0
      */
     void canjearGemas();
+
+    /**
+     * Lleva combustible y energia al tope.
+     * post -> combustible == Tanque.TOPE_COMBUSTIBLE y energia == Tanque.TOPE_ENERGIA
+     */
+    void recargarTotal();
+
+    /**
+     * post -> getDesgaste() == 0
+     */
+    void realizarMantenimiento();
 
 
     // ---- registro en la bitacora del asistente ----

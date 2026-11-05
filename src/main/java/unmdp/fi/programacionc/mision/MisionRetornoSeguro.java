@@ -28,13 +28,19 @@ public class MisionRetornoSeguro extends Mision {
         return ENERGIA_REQUERIDA;
     }
 
+    /** El retorno es justamente para volver a mantenimiento: no se rechaza por desgaste alto. */
+    @Override
+    protected boolean requiereMantenimientoAlDia() {
+        return false;
+    }
+
     /**
      * Exito: la nave termina en estado operativo valido, es decir, con el motor disponible
      * y sin mantenimiento pendiente.
      */
     @Override
     protected ResultadoMision evaluar() {
-        boolean operativa = getAsistente().estaDisponible() && !getAsistente().necesitaMantenimiento();
+        boolean operativa = !getAsistente().estaDestruida() && !getAsistente().necesitaMantenimiento();
         return operativa ? ResultadoMision.EXITOSA : ResultadoMision.FALLIDA;
     }
 
@@ -44,6 +50,8 @@ public class MisionRetornoSeguro extends Mision {
         switch (resultado) {
             case EXITOSA:
                 mensaje = "regreso completado, la nave quedo operativa";
+                getAsistente().recargarTotal();
+                getAsistente().realizarMantenimiento();
                 break;
             case FALLIDA:
                 mensaje = "la nave regreso pero no quedo en estado operativo (requiere mantenimiento)";

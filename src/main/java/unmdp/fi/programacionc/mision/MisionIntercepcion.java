@@ -30,11 +30,11 @@ public class MisionIntercepcion extends Mision {
 
     /**
      * Exito: la asistencia se completo con recursos suficientes (ya consumidos en ejecutar())
-     * y la nave quedo operativa (motor disponible).
+     * y la nave no fue destruida.
      */
     @Override
     protected ResultadoMision evaluar() {
-        return getAsistente().estaDisponible() ? ResultadoMision.EXITOSA : ResultadoMision.FALLIDA;
+        return !getAsistente().estaDestruida() ? ResultadoMision.EXITOSA : ResultadoMision.FALLIDA;
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Asistente de comando que opera una nave (Aclaracion R2): todo lo que se le puede consultar
  * u ordenar a una nave. Incluye lo que ven las misiones (OperadorMision) y suma las ordenes
- * que solo da quien opera la nave (cargas, mantenimiento, enfriamiento) y la consulta de la bitacora.
+ * que solo da quien opera la nave (cargas y mantenimiento) y la consulta de la bitacora.
  *
  * Tambien es la NavePropia que ven los elementos del tablero (asteroides, estaciones, naves enemigas):
  * el tablero le pasa a cada elemento nave.getAsistente().
@@ -24,8 +24,6 @@ public interface Asistente extends OperadorMision, NavePropia {
     List<EventoBitacora> getEventos();
 
     // ---- ordenes (lanzan OperacionInvalidaException si la nave las rechaza) ----
-    void enfriar();
-    void completarEnfriamiento();
     void cargarCombustible(int carga);
     void cargarEnergia(int carga);
     void realizarMantenimiento();
