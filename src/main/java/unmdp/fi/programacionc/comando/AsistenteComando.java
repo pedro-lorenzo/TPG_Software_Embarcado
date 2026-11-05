@@ -9,6 +9,7 @@ import unmdp.fi.programacionc.recursos.Tanque;
 import unmdp.fi.programacionc.tablero.Combatiente;
 import unmdp.fi.programacionc.tablero.NaveEnemiga;
 import unmdp.fi.programacionc.tablero.ResultadoBatalla;
+import unmdp.fi.programacionc.tripulacion.Tripulante;
 
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class AsistenteComando implements Asistente {
     private final Tanque tanque;
     private final MotorWarp motor;
     private final Bitacora bitacora;
+    private final List<Tripulante> tripulantes;
     private Combatiente combatiente;
     private int gemas = 0;
     private boolean destruida = false;
@@ -45,13 +47,16 @@ public class AsistenteComando implements Asistente {
      * Lo crea la fabrica de naves, que le pasa los componentes de la nave que va a operar.
      * pre -> tanque != null
      * pre -> motor != null
+     * pre -> tripulantes != null
      * post -> el asistente tiene una bitacora propia y vacia (salvo el evento de inicio)
      */
-    public AsistenteComando(Tanque tanque, MotorWarp motor) {
+    public AsistenteComando(Tanque tanque, MotorWarp motor, List<Tripulante> tripulantes) {
         assert tanque != null : "El asistente necesita el tanque de la nave";
         assert motor != null : "El asistente necesita el motor de la nave";
+        assert tripulantes != null : "El asistente necesita la tripulacion de la nave";
         this.tanque = tanque;
         this.motor = motor;
+        this.tripulantes = tripulantes;
         this.bitacora = new Bitacora();
         this.bitacora.registrar(TipoEvento.SISTEMA, "Asistente de comando iniciado. " + estadoRecursos()
                 + ", motor " + motor.getEstadoActual());

@@ -86,6 +86,41 @@ public class Tanque {
         assert verificarInvariante();
     }
 
+    // ===================== EFECTOS DEL UNIVERSO (Parte 2) =====================
+    // Un asteroide o una estacion de carga no son ordenes: no se pueden rechazar.
+    // Por eso no lanzan excepcion: el resultado se topea en los limites del tanque.
+
+    /**
+     * Danio de un obstaculo (asteroide). La energia nunca queda negativa: baja hasta 0 como minimo.
+     * pre -> energia > 0
+     * post -> energia = max(0, energia anterior - energia)
+     */
+    public void recibirDanio(int energia) {
+        assert energia > 0 : "El danio debe ser positivo";
+        this.energia = Math.max(0, this.energia - energia);
+        assert verificarInvariante();
+    }
+
+    /**
+     * Recarga de una estacion de carga. Lo que exceda la capacidad se pierde.
+     * pre -> combustible >= 0 y energia >= 0
+     * post -> cada recurso = min(tope, valor anterior + recarga)
+     */
+    public void recargarHastaTope(int combustible, int energia) {
+        assert combustible >= 0 && energia >= 0 : "La recarga no puede ser negativa";
+        this.combustible = Math.min(TOPE_COMBUSTIBLE, this.combustible + combustible);
+        this.energia = Math.min(TOPE_ENERGIA, this.energia + energia);
+        assert verificarInvariante();
+    }
+
+    /**
+     * La nave queda inoperativa si se agota el combustible o la energia, o si el desgaste
+     * llega al maximo (enunciado Parte 2). La consulta el asistente despues de cada cambio.
+     */
+    public boolean estaAgotado() {
+        return this.combustible == 0 || this.energia == 0 || this.desgaste == TOPE_DESGASTE;
+    }
+
     public boolean necesitaMantenimiento() {
         return this.desgaste >= UMBRAL_MANTENIMIENTO;
     }

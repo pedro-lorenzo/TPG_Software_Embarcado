@@ -3,37 +3,34 @@ package unmdp.fi.programacionc.mision;
 import unmdp.fi.programacionc.destinoytablero.Posicion;
 
 /**
- * Ruta en L entre dos posiciones: primero se avanza en x y despues en y, de a un casillero.
- * Solo calcula; no mueve nada (la posicion de la nave la tiene el Tablero).
+ * Ruta en L sobre el tablero de la catedra: primero se avanza en X hasta igualar la del
+ * destino y despues en Y. Siempre una sola casilla por paso.
  */
 public final class Ruta {
 
     private Ruta() { }
 
     /**
-     * Siguiente casillero de la ruta en L desde origen hacia destino.
-     * pre -> origen != null y destino != null
-     * post -> si origen equals destino devuelve origen; si no, devuelve una posicion
-     *         a distancia 1 de origen (primero se corrige x, despues y)
+     * pre -> origen y destino != null
+     * pre -> origen distinto de destino
+     * post -> devuelve la casilla vecina en direccion al destino
      */
     public static Posicion pasoHacia(Posicion origen, Posicion destino) {
-        assert origen != null && destino != null : "Las posiciones no pueden ser nulas";
+        assert origen != null && destino != null : "Origen y destino no pueden ser nulos";
+        assert !origen.equals(destino) : "Ya se esta en el destino";
         if (origen.getX() != destino.getX()) {
             return new Posicion(origen.getX() + Integer.signum(destino.getX() - origen.getX()), origen.getY());
         }
-        if (origen.getY() != destino.getY()) {
-            return new Posicion(origen.getX(), origen.getY() + Integer.signum(destino.getY() - origen.getY()));
-        }
-        return origen;
+        return new Posicion(origen.getX(), origen.getY() + Integer.signum(destino.getY() - origen.getY()));
     }
 
     /**
-     * Cantidad de casilleros de la ruta en L (distancia Manhattan).
-     * pre -> origen != null y destino != null
-     * post -> resultado >= 0; es 0 solo si las posiciones son iguales
+     * Cantidad de pasos de la ruta en L (distancia Manhattan).
+     * pre -> origen y destino != null
+     * post -> resultado >= 0; es 0 solo si son la misma casilla
      */
     public static int distanciaA(Posicion origen, Posicion destino) {
-        assert origen != null && destino != null : "Las posiciones no pueden ser nulas";
+        assert origen != null && destino != null : "Origen y destino no pueden ser nulos";
         return Math.abs(destino.getX() - origen.getX()) + Math.abs(destino.getY() - origen.getY());
     }
 }

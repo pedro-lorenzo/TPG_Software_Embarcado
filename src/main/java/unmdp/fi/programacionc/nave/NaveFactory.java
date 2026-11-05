@@ -3,6 +3,10 @@ package unmdp.fi.programacionc.nave;
 import unmdp.fi.programacionc.comando.AsistenteComando;
 import unmdp.fi.programacionc.motor.MotorWarp;
 import unmdp.fi.programacionc.recursos.Tanque;
+import unmdp.fi.programacionc.tripulacion.Tripulante;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Patron Factory (E1-07): unico lugar del sistema que conoce las clases concretas de nave
@@ -56,8 +60,10 @@ public final class NaveFactory {
     private static Nave crearExploradora(int id) {
         Tanque tanque = new Tanque(NaveExploradora.COMBUSTIBLE_INICIAL, NaveExploradora.ENERGIA_INICIAL);
         MotorWarp motor = new MotorWarp();
-        AsistenteComando asistente = new AsistenteComando(tanque, motor);
-        Nave nave = new NaveExploradora(id, tanque, motor, asistente);
+        List<Tripulante> tripulantes = new ArrayList<>();
+        AsistenteComando asistente = new AsistenteComando(tanque, motor,
+                Collections.unmodifiableList(tripulantes));
+        Nave nave = new NaveExploradora(id, tanque, motor, asistente, tripulantes);   // la subclase que corresponda
         asistente.asignarCombatiente(nave);
         return nave;
     }
@@ -65,8 +71,10 @@ public final class NaveFactory {
     private static Nave crearCarguero(int id) {
         Tanque tanque = new Tanque(NaveCarguero.COMBUSTIBLE_INICIAL, NaveCarguero.ENERGIA_INICIAL);
         MotorWarp motor = new MotorWarp();
-        AsistenteComando asistente = new AsistenteComando(tanque, motor);
-        Nave nave = new NaveCarguero(id, tanque, motor, asistente);
+        List<Tripulante> tripulantes = new ArrayList<>();
+        AsistenteComando asistente = new AsistenteComando(tanque, motor,
+                Collections.unmodifiableList(tripulantes));
+        Nave nave = new NaveCarguero(id, tanque, motor, asistente, tripulantes);   // la subclase que corresponda
         asistente.asignarCombatiente(nave);
         return nave;
     }
@@ -74,8 +82,10 @@ public final class NaveFactory {
     private static Nave crearCombate(int id) {
         Tanque tanque = new Tanque(NaveCombate.COMBUSTIBLE_INICIAL, NaveCombate.ENERGIA_INICIAL);
         MotorWarp motor = new MotorWarp();
-        AsistenteComando asistente = new AsistenteComando(tanque, motor);
-        Nave nave = new NaveCombate(id, tanque, motor, asistente);
+        List<Tripulante> tripulantes = new ArrayList<>();
+        AsistenteComando asistente = new AsistenteComando(tanque, motor,
+                Collections.unmodifiableList(tripulantes));
+        Nave nave = new NaveCombate(id, tanque, motor, asistente, tripulantes);   // la subclase que corresponda
         asistente.asignarCombatiente(nave);
         return nave;
     }

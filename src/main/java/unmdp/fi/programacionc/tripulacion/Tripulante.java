@@ -1,7 +1,8 @@
 package unmdp.fi.programacionc.tripulacion;
 
 /**
- * Tripulante de la nave (E1-04). Inmutable: sus datos no cambian despues de creado.
+ * Tripulante de la nave (E1-04). Sus datos personales no cambian despues de creado;
+ * lo unico que cambia es si sigue vivo (se pierde cuando la nave es destruida, Parte 2).
  *
  * inv -> nombre != null
  * inv -> cargo != null y origen != null
@@ -14,6 +15,7 @@ public class Tripulante {
     private final Cargo cargo;
     private final Origen origen;
     private final int antiguedad;
+    private boolean fallecido = false;
 
     /**
      * Los datos llegan validados por quien crea al tripulante, por eso son precondiciones.
@@ -39,4 +41,16 @@ public class Tripulante {
     public Cargo getCargo()    { return cargo; }
     public Origen getOrigen()  { return origen; }
     public int getAntiguedad() { return antiguedad; }
+
+    /**
+     * Lo marca como fallecido (la nave fue destruida con el a bordo).
+     * pre -> no estaba fallecido
+     * post -> estaFallecido() == true
+     */
+    public void marcarFallecido() {
+        assert !fallecido : "El tripulante " + nombre + " ya estaba fallecido";
+        this.fallecido = true;
+    }
+
+    public boolean estaFallecido() { return fallecido; }
 }
