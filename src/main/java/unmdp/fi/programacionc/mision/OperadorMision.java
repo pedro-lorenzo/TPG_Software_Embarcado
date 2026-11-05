@@ -1,7 +1,6 @@
 package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.bitacora.TipoEvento;
-import unmdp.fi.programacionc.tablero.Coordenada;
 
 /**
  * Lo que una mision puede consultar y ordenar a la nave, a traves de su asistente. Nada mas.
@@ -20,10 +19,6 @@ public interface OperadorMision {
     int getEnergia();
     int getDesgaste();
     boolean necesitaMantenimiento();
-    /**
-     * pre -> la nave ya tiene posicion (se la asigna la primera llamada a moverA)
-     */
-    Coordenada getPosicion();
 
     /** Una nave destruida no se reusa: la mision tiene que terminar. */
     boolean estaDestruida();
@@ -35,13 +30,6 @@ public interface OperadorMision {
     void prepararSalto();
     void saltar();
     void finalizarSalto();
-    /**
-     * Ubica a la nave en esa coordenada (la primera vez la ubica, despues la mueve).
-     * pre -> destino != null
-     * pre -> la nave no esta destruida
-     */
-    void moverA(Coordenada destino);
-
     /**
      * pre -> cantidad > 0
      */

@@ -6,7 +6,6 @@ import unmdp.fi.programacionc.bitacora.TipoEvento;
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 import unmdp.fi.programacionc.motor.MotorWarp;
 import unmdp.fi.programacionc.recursos.Tanque;
-import unmdp.fi.programacionc.tablero.Coordenada;
 import unmdp.fi.programacionc.tablero.Combatiente;
 import unmdp.fi.programacionc.tablero.NaveEnemiga;
 import unmdp.fi.programacionc.tablero.ResultadoBatalla;
@@ -38,7 +37,6 @@ public class AsistenteComando implements Asistente {
     private final MotorWarp motor;
     private final Bitacora bitacora;
     private Combatiente combatiente;
-    private Coordenada posicion;           // null hasta que se ubica a la nave en el tablero
     private int gemas = 0;
     private boolean destruida = false;
     private String motivoDestruccion;
@@ -83,15 +81,6 @@ public class AsistenteComando implements Asistente {
         assert combatiente != null : "El combatiente no puede ser nulo";
         assert this.combatiente == null : "El asistente ya tiene un combatiente asignado";
         this.combatiente = combatiente;
-    }
-
-    /**
-     * pre -> la nave ya tiene una posicion asignada
-     */
-    @Override
-    public Coordenada getPosicion() {
-        assert posicion != null : "La nave todavia no fue ubicada en el tablero";
-        return posicion;
     }
 
     @Override public boolean estaDestruida() { return destruida; }
@@ -266,22 +255,6 @@ public class AsistenteComando implements Asistente {
     }
 
     // ===================== NAVEGACION, GEMAS Y DESTRUCCION =====================
-
-    /**
-     * La primera llamada ubica a la nave; las siguientes la mueven. No consume recursos:
-     * el costo del viaje lo descuenta la mision.
-     * pre -> destino != null
-     * pre -> la nave no esta destruida
-     * post -> getPosicion() equals destino
-     */
-    @Override
-    public void moverA(Coordenada destino) {
-        assert destino != null : "El destino no puede ser nulo";
-        assert !destruida : "Una nave destruida no se mueve";
-        String antes = posicion == null ? "sin ubicar" : posicion.toString();
-        posicion = destino;
-        bitacora.registrar(TipoEvento.SISTEMA, "Posicion: " + antes + " -> " + destino);
-    }
 
     /**
      * pre -> cantidad > 0
