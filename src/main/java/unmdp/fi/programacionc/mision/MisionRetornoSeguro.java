@@ -1,6 +1,8 @@
 package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.bitacora.TipoEvento;
+import unmdp.fi.programacionc.destinoytablero.Destino;
+import unmdp.fi.programacionc.destinoytablero.Tablero;
 
 /**
  * M-03 Retorno seguro. Version simplificada de E1: su accion es simulada
@@ -14,8 +16,8 @@ public class MisionRetornoSeguro extends Mision {
     /**
      * pre -> asistente != null (lo verifica Mision)
      */
-    public MisionRetornoSeguro(OperadorMision asistente) {
-        super("M-03", "Retorno seguro", "Completar el regreso simulado", asistente);
+    public MisionRetornoSeguro(OperadorMision asistente, Tablero tablero, Destino destino) {
+        super("M-03", "Retorno seguro", "Completar el regreso simulado", asistente, tablero, destino);
     }
 
     @Override
@@ -40,7 +42,7 @@ public class MisionRetornoSeguro extends Mision {
      */
     @Override
     protected ResultadoMision evaluar() {
-        boolean operativa = !getAsistente().estaDestruida() && !getAsistente().necesitaMantenimiento();
+        boolean operativa = !getAsistente().estaDestruida();
         return operativa ? ResultadoMision.EXITOSA : ResultadoMision.FALLIDA;
     }
 

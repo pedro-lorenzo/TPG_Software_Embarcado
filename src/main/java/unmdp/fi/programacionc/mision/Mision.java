@@ -2,6 +2,9 @@ package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.bitacora.TipoEvento;
 import unmdp.fi.programacionc.excepciones.MisionNoEjecutableException;
+import unmdp.fi.programacionc.destinoytablero.Destino;
+import unmdp.fi.programacionc.destinoytablero.Posicion;
+import unmdp.fi.programacionc.destinoytablero.Tablero;
 
 /**
  * Mision encomendada a un asistente de comando (Aclaracion R4).
@@ -28,6 +31,10 @@ public abstract class Mision {
     private final String nombre;
     private final String descripcion;
     private final OperadorMision asistente;
+    private final Tablero tablero;
+    private final Destino destino;
+    private Posicion objetivo;
+    private boolean llegoAlDestino = false;
 
     private boolean finalizada = false;
 
@@ -35,7 +42,7 @@ public abstract class Mision {
      * pre -> codigo, nombre y descripcion no nulos ni vacios
      * pre -> asistente != null
      */
-    protected Mision(String codigo, String nombre, String descripcion, OperadorMision asistente) {
+    protected Mision(String codigo, String nombre, String descripcion, OperadorMision asistente, Tablero tablero, Destino destino) {
         assert codigo != null && !codigo.trim().isEmpty() : "El codigo de la mision no puede ser nulo ni vacio";
         assert nombre != null && !nombre.trim().isEmpty() : "El nombre de la mision no puede ser nulo ni vacio";
         assert descripcion != null && !descripcion.trim().isEmpty() : "La descripcion no puede ser nula ni vacia";
@@ -44,6 +51,8 @@ public abstract class Mision {
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.asistente = asistente;
+        this.tablero = tablero;
+        this.destino = destino;
     }
 
     // ===================== TEMPLATE METHOD =====================
@@ -138,7 +147,7 @@ public abstract class Mision {
             throw new MisionNoEjecutableException("energia insuficiente (requiere "
                     + getEnergiaRequerida() + ", hay " + asistente.getEnergia() + ")");
         }
-
+        objetivo = calcularObjetivo(tablero);
         asistente.registrarEvento(TipoEvento.MISION, codigo + ": preparacion correcta");
     }
 
@@ -150,7 +159,8 @@ public abstract class Mision {
      */
     private void ejecutar() {
         asistente.consumir(getCombustibleRequerido(), getEnergiaRequerida(), DESGASTE_PRODUCIDO);
-        asistente.saltar();
+        Travesia travesia = new Travesia(tablero, destino, asistente, asistente);
+        llegoAlDestino = travesia.recorrerHasta(objetivo);
         asistente.registrarEvento(TipoEvento.MISION, codigo + ": " + descripcion);
     }
 
@@ -190,10 +200,22 @@ public abstract class Mision {
      */
     protected abstract void cerrar(ResultadoMision resultado, String motivo);
 
+    /**
+     * Calcula la coordenada de destino de esta mision (radar de largo alcance).
+     * Cada mision concreta decide cual es su objetivo.
+     *
+     * pre -> tablero != null
+     * post -> resultado != null
+     * post -> resultado esta dentro de los limites del tablero
+     */
+    protected abstract Posicion calcularObjetivo(Tablero tablero);
+
     // ===================== ACCESO PARA LAS SUBCLASES =====================
 
     /** Las subclases hablan con la nave unicamente a traves del asistente. */
     protected OperadorMision getAsistente() { return asistente; }
+
+    protected boolean llegoAlDestino() { return llegoAlDestino; }
 
     // ===================== CONSULTAS =====================
 

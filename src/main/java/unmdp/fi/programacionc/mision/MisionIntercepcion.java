@@ -1,6 +1,9 @@
 package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.bitacora.TipoEvento;
+import unmdp.fi.programacionc.destinoytablero.Destino;
+import unmdp.fi.programacionc.destinoytablero.Posicion;
+import unmdp.fi.programacionc.destinoytablero.Tablero;
 
 /**
  * M-01 Intercepcion y asistencia. Version simplificada de E1: su accion es simulada
@@ -14,8 +17,8 @@ public class MisionIntercepcion extends Mision {
     /**
      * pre -> asistente != null (lo verifica Mision)
      */
-    public MisionIntercepcion(OperadorMision asistente) {
-        super("M-01", "Intercepcion y asistencia", "Llegar al objetivo simulado y realizar la asistencia", asistente);
+    public MisionIntercepcion(OperadorMision asistente, Tablero tablero, Destino destino) {
+        super("M-01", "Intercepcion y asistencia", "Llegar al objetivo simulado y realizar la asistencia", asistente, tablero, destino);
     }
 
     @Override
@@ -51,5 +54,8 @@ public class MisionIntercepcion extends Mision {
                 mensaje = "no se realizo: " + motivo;
         }
         getAsistente().registrarEvento(TipoEvento.MISION, getCodigo() + " cerrada [" + resultado + "] " + mensaje);
+    }
+    protected Posicion calcularObjetivo(Tablero tablero){
+        return tablero.obtenerObjetivo();
     }
 }
