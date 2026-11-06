@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS usuario (nombre_usuario VARCHAR(50) PRIMARY KEY, contrasenia VARCHAR(50) NOT NULL);
