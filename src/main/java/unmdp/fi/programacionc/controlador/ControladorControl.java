@@ -100,7 +100,34 @@ public class ControladorControl implements ActionListener, ObservadorSesion {
         Nave nave = sesion.getNaveActual();
         Asistente asistente = nave.getAsistente();
 
-        // ... (todo igual hasta vista.mostrarBitacora(lineas);)
+        String general;
+        boolean alerta;
+        if (asistente.estaDestruida()) {
+            general = "Nave destruida";
+            alerta = true;
+        } else if (sesion.hayMisionEnCurso()) {
+            general = "Mision en curso";
+            alerta = false;
+        } else if (asistente.necesitaMantenimiento()) {
+            general = "Requiere mantenimiento";
+            alerta = true;
+        } else if (!nave.tieneTripulacionValida()) {
+            general = "Tripulacion incompleta";
+            alerta = true;
+        } else {
+            general = "Operativa";
+            alerta = false;
+        }
+        vista.mostrarNave("Nave #" + nave.getId() + " - " + nave.getTipo(), asistente.getEstadoMotor(), general, alerta);
+        vista.mostrarRecursos(asistente.getCombustible(), asistente.getEnergia(), asistente.getDesgaste(),
+                asistente.necesitaMantenimiento(), asistente.getGemas());
+
+        List<String> lineas = new ArrayList<>();
+        for (EventoBitacora e : asistente.getEventos()) {
+            lineas.add(String.format("#%-3d %s  [%s]  %s", e.getNumero(), e.getFecha().format(HORA),
+                    e.getTipo(), e.getDescripcion()));
+        }
+        vista.mostrarBitacora(lineas);
 
         List<String> informes = new ArrayList<>();
         for (InformeMision informe : asistente.getInformes()) {
