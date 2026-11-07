@@ -6,6 +6,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import java.awt.Color;
@@ -90,6 +91,27 @@ public final class Tema {
     /** Boton secundario: solo el borde, en naranja. */
     public static JButton botonSecundario(String texto) {
         return boton(texto, NARANJA, NARANJA, false);
+    }
+
+    /** Boton de la fila de pestanias. Se marca con setSelected(true) en la pestania activa. */
+    public static JToggleButton botonPestania(String texto) {
+        JToggleButton boton = new JToggleButton(texto.toUpperCase()) {
+            @Override public void setSelected(boolean seleccionado) {
+                super.setSelected(seleccionado);
+                setForeground(seleccionado ? CIAN : TEXTO_SUAVE);
+                setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 0, 2, 0, seleccionado ? CIAN : PANEL),
+                        BorderFactory.createEmptyBorder(12, 20, 10, 20)));
+            }
+        };
+        boton.setFont(BOTON);
+        boton.setBackground(PANEL);
+        boton.setOpaque(true);
+        boton.setContentAreaFilled(false);
+        boton.setFocusPainted(false);
+        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        boton.setSelected(false);
+        return boton;
     }
 
     /** Borde de las tarjetas y paneles: franja cian arriba, linea fina alrededor y aire adentro. */

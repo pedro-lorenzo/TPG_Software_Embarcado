@@ -1,7 +1,9 @@
 package unmdp.fi.programacionc.controlador;
 
+import unmdp.fi.programacionc.aplicacion.Sesion;
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 import unmdp.fi.programacionc.persistencia.ControlAcceso;
+import unmdp.fi.programacionc.universo.Universo;
 import unmdp.fi.programacionc.vista.IVistaLogin;
 
 import java.awt.event.ActionEvent;
@@ -47,7 +49,8 @@ public class ControladorLogin implements ActionListener {
         if (controlAcceso.iniciarSesion(usuario, contrasenia)) {
             vista.mostrarMensaje("Bienvenido/a, " + usuario);
             vista.cerrar();
-            // PROXIMO PASO: abrir la ventana principal (seleccion de vista)
+            // Seleccion de vista: el login termino, se abre el panel de control con una sesion nueva
+            new ControladorPrincipal(new Sesion(usuario, new Universo())).mostrar();
         } else {
             vista.mostrarError("Usuario o contrasenia incorrectos");
         }
