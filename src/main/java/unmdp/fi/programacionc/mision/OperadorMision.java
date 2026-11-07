@@ -25,7 +25,7 @@ public interface OperadorMision extends NavePropia{
     boolean estaDestruida();
 
     int getGemas();
-
+    String getMotivoDestruccion();
     // ---- ordenes (lanzan OperacionInvalidaException si la nave las rechaza) ----
     void consumir(int combustible, int energia, int desgaste);
     /**

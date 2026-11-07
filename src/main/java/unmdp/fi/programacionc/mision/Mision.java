@@ -90,6 +90,7 @@ public abstract class Mision {
             motivo = e.getMessage();
             asistente.registrarEvento(TipoEvento.ERROR, codigo + " rechazada: " + motivo);
         }
+        String observaciones = (resultado == ResultadoMision.RECHAZADA) ? motivo : explicarResultado(resultado);
         // Informe (Aclaracion R5): consumos del recorrido, medidos despues de evaluar y antes de cerrar
         int combustibleConsumido = combustibleInicial - asistente.getCombustible();
         int energiaConsumida = energiaInicial - asistente.getEnergia();
@@ -108,7 +109,7 @@ public abstract class Mision {
                 asistente.getEnergia() - energiaAntes,
                 asistente.getDesgaste() - desgasteAntes,
                 asistente.getGemas() - gemasAntes,
-                asistente.getEstadoMotor(), motivo);
+                asistente.getEstadoMotor(), observaciones);
         asistente.registrarInforme(informe);
         asistente.registrarEvento(TipoEvento.MISION, codigo + " informe: " + informe.resumen());
 
@@ -164,6 +165,25 @@ public abstract class Mision {
         asistente.registrarEvento(TipoEvento.MISION, codigo + ": " + descripcion);
     }
 
+    /**
+     * Explica por que una mision no tuvo exito, para las observaciones del informe.
+     * post -> null si la mision no fue FALLIDA
+     */
+    private String explicarResultado(ResultadoMision resultado) {
+        if (resultado != ResultadoMision.FALLIDA) {
+            return null;
+        }
+        if (asistente.estaDestruida()) {
+            return "la nave fue destruida: " + asistente.getMotivoDestruccion();
+        }
+        if (!llegoAlDestino) {
+            return "no llego al destino: se quedo sin combustible para seguir saltando";
+        }
+        if (!destinoVerificado) {
+            return "llego al destino pero no conservaba los recursos a entregar";
+        }
+        return "no se cumplio la condicion de exito de la mision";
+    }
     // ===================== GANCHOS DE CADA MISION =====================
 
     /**

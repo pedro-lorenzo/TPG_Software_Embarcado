@@ -2,6 +2,7 @@ package unmdp.fi.programacionc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import unmdp.fi.programacionc.bitacora.EventoBitacora;
 import unmdp.fi.programacionc.comando.Asistente;
@@ -75,9 +76,11 @@ public class Main {
                 + nave.getTripulantes().size() + " tripulantes");
         mostrarRecursos("Recursos iniciales", asistente);
 
-        ejecutar(m01(asistente), asistente);
-        ejecutar(m02(asistente), asistente);
-        ejecutar(m03(asistente), asistente);
+        Tablero tablero = tableroVacio();
+        Destino destino = new Destino(tablero);
+        ejecutar(new MisionIntercepcion(asistente, new Random(2), tablero, destino), asistente);
+        ejecutar(new MisionRecoleccion(asistente, new Random(1), tablero, destino), asistente);
+        ejecutar(new MisionRetornoSeguro(asistente, tablero, destino), asistente);
 
         mostrarRecursos("Recursos finales", asistente);
         mostrarBitacora(asistente);
@@ -223,7 +226,7 @@ public class Main {
 
     private static Tablero tableroVacio() {
         try {
-            return new Tablero(20, 20, new ArrayList<>());
+            return new Tablero(10, 10, new ArrayList<>());
         } catch (Exception e) {
             throw new IllegalStateException("No se pudo crear el tablero de la demo", e);
         }
