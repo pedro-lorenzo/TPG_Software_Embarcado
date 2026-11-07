@@ -1,0 +1,128 @@
+package unmdp.fi.programacionc.controlador;
+
+import unmdp.fi.programacionc.aplicacion.ObservadorSesion;
+import unmdp.fi.programacionc.aplicacion.Sesion;
+import unmdp.fi.programacionc.bitacora.EventoBitacora;
+import unmdp.fi.programacionc.comando.Asistente;
+import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
+import unmdp.fi.programacionc.nave.Nave;
+import unmdp.fi.programacionc.vista.IVistaControl;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Seccion de Control de la nave. Toda orden pasa por el asistente de la nave actual (R2).
+ *  - ActionListener: cargas y mantenimiento.
+ *  - ObservadorSesion: cuando cambia la nave, refresca recursos y bitacora.
+ */
+public class ControladorControl implements ActionListener, ObservadorSesion {
+
+    private static final DateTimeFormatter HORA = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+    private final IVistaControl vista;
+    private final Sesion sesion;
+
+    /**
+     * pre -> vista != null y sesion != null
+     */
+    public ControladorControl(IVistaControl vista, Sesion sesion) {
+        assert vista != null && sesion != null : "El controlador necesita vista y sesion";
+        this.vista = vista;
+        this.sesion = sesion;
+        vista.setActionListener(this);
+        sesion.agregarObservador(this);
+        sesionActualizada();
+    }
+
+    // ===================== acciones del usuario =====================
+
+    @Override
+    public void actionPerformed(ActionEvent evento) {
+        if (!sesion.tieneNave()) {
+            return;
+        }
+        Asistente asistente = sesion.getNaveActual().getAsistente();
+        try {
+            switch (evento.getActionCommand()) {
+                case IVistaControl.CARGAR_COMBUSTIBLE:
+                    asistente.cargarCombustible(leerCantidad());
+                    vista.limpiarCantidad();
+                    break;
+                case IVistaControl.CARGAR_ENERGIA:
+                    asistente.cargarEnergia(leerCantidad());
+                    vista.limpiarCantidad();
+                    break;
+                case IVistaControl.MANTENIMIENTO:
+                    asistente.realizarMantenimiento();
+                    break;
+                default:
+                    return;
+            }
+        } catch (OperacionInvalidaException e) {
+            vista.mostrarError(e.getMessage());
+        }
+        // Haya salido bien o no, la bitacora cambio (el asistente registra tambien los rechazos)
+        sesion.notificar();
+    }
+
+    /**
+     * La carga positiva es precondicion de Tanque (assert): como el dato viene del usuario,
+     * el controlador la garantiza antes de llamar, avisando con un error si no se cumple.
+     */
+    private int leerCantidad() {
+        int cantidad;
+        try {
+            cantidad = Integer.parseInt(vista.getCantidad().trim());
+        } catch (NumberFormatException e) {
+            throw new OperacionInvalidaException("La cantidad tiene que ser un numero entero");
+        }
+        if (cantidad <= 0) {
+            throw new OperacionInvalidaException("La cantidad tiene que ser mayor a cero");
+        }
+        return cantidad;
+    }
+
+    // ===================== Observer: la sesion cambio =====================
+
+    @Override
+    public void sesionActualizada() {
+        if (!sesion.tieneNave()) {
+            vista.sinNave();
+            vista.habilitarAcciones(false);
+            return;
+        }
+        Nave nave = sesion.getNaveActual();
+        Asistente asistente = nave.getAsistente();
+
+        String general;
+        boolean alerta;
+        if (asistente.estaDestruida()) {
+            general = "Nave destruida";
+            alerta = true;
+        } else if (asistente.necesitaMantenimiento()) {
+            general = "Requiere mantenimiento";
+            alerta = true;
+        } else if (!nave.tieneTripulacionValida()) {
+            general = "Tripulacion incompleta";
+            alerta = true;
+        } else {
+            general = "Operativa";
+            alerta = false;
+        }
+        vista.mostrarNave("Nave #" + nave.getId() + " - " + nave.getTipo(), asistente.getEstadoMotor(), general, alerta);
+        vista.mostrarRecursos(asistente.getCombustible(), asistente.getEnergia(), asistente.getDesgaste(),
+                asistente.necesitaMantenimiento(), asistente.getGemas());
+
+        List<String> lineas = new ArrayList<>();
+        for (EventoBitacora e : asistente.getEventos()) {
+            lineas.add(String.format("#%-3d %s  [%s]  %s", e.getNumero(), e.getFecha().format(HORA),
+                    e.getTipo(), e.getDescripcion()));
+        }
+        vista.mostrarBitacora(lineas);
+        vista.habilitarAcciones(!asistente.estaDestruida());
+    }
+}

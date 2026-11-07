@@ -1,7 +1,17 @@
 package unmdp.fi.programacionc.vista;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
@@ -10,6 +20,7 @@ import javax.swing.JToggleButton;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.FocusAdapter;
@@ -51,6 +62,15 @@ public final class Tema {
         UIManager.put("OptionPane.messageForeground", TEXTO);
         UIManager.put("Button.background", CIAN);
         UIManager.put("Button.foreground", FONDO);
+        UIManager.put("ComboBox.background", CAMPO);
+        UIManager.put("ComboBox.foreground", TEXTO);
+        UIManager.put("ComboBox.selectionBackground", BORDE);
+        UIManager.put("ComboBox.selectionForeground", TEXTO);
+        UIManager.put("ComboBox.buttonBackground", CAMPO);
+        UIManager.put("ComboBox.buttonDarkShadow", TEXTO_SUAVE);
+        UIManager.put("ComboBox.disabledBackground", CAMPO);
+        UIManager.put("ComboBox.disabledForeground", TEXTO_SUAVE);
+        UIManager.put("Button.disabledText", TEXTO_SUAVE);
     }
 
     public static JLabel titulo(String texto) {
@@ -114,6 +134,84 @@ public final class Tema {
         return boton;
     }
 
+    /** Tarjeta vertical: fondo de panel, franja cian arriba. Se le agregan componentes con Tema.izquierda(...). */
+    public static JPanel tarjeta() {
+        JPanel tarjeta = new JPanel();
+        tarjeta.setLayout(new BoxLayout(tarjeta, BoxLayout.Y_AXIS));
+        tarjeta.setBackground(PANEL);
+        tarjeta.setBorder(bordePanel());
+        return tarjeta;
+    }
+
+    public static JComboBox<String> combo() {
+        JComboBox<String> combo = new JComboBox<>();
+        combo.setFont(NORMAL);
+        combo.setBackground(CAMPO);
+        combo.setForeground(TEXTO);
+        combo.setBorder(BorderFactory.createLineBorder(BORDE, 1));
+        combo.setFocusable(false);
+        // cada opcion (y la elegida) en colores oscuros, sin el recuadro blanco de Swing
+        combo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, false);
+                setBackground(isSelected && index >= 0 ? BORDE : CAMPO);
+                setForeground(combo.isEnabled() ? TEXTO : TEXTO_SUAVE);
+                setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
+                return this;
+            }
+        });
+        return combo;
+    }
+
+    public static JList<String> lista() {
+        JList<String> lista = new JList<>();
+        lista.setFont(NORMAL);
+        lista.setBackground(CAMPO);
+        lista.setForeground(TEXTO);
+        lista.setSelectionBackground(BORDE);
+        lista.setSelectionForeground(TEXTO);
+        lista.setBorder(BorderFactory.createEmptyBorder(6, 8, 6, 8));
+        return lista;
+    }
+
+    /** Tabla oscura de solo lectura: se elige una fila por vez. */
+    public static JTable tabla() {
+        JTable tabla = new JTable() {
+            @Override public boolean isCellEditable(int fila, int columna) { return false; }
+        };
+        tabla.setFont(NORMAL);
+        tabla.setRowHeight(28);
+        tabla.setBackground(CAMPO);
+        tabla.setForeground(TEXTO);
+        tabla.setGridColor(BORDE);
+        tabla.setShowVerticalLines(false);
+        tabla.setSelectionBackground(BORDE);
+        tabla.setSelectionForeground(TEXTO);
+        tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tabla.setFillsViewportHeight(true);
+        JTableHeader encabezado = tabla.getTableHeader();
+        encabezado.setReorderingAllowed(false);
+        DefaultTableCellRenderer estiloEncabezado = new DefaultTableCellRenderer();
+        estiloEncabezado.setBackground(PANEL);
+        estiloEncabezado.setForeground(TEXTO_SUAVE);
+        estiloEncabezado.setFont(ETIQUETA);
+        estiloEncabezado.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, BORDE),
+                BorderFactory.createEmptyBorder(8, 6, 8, 6)));
+        encabezado.setDefaultRenderer(estiloEncabezado);
+        return tabla;
+    }
+
+    /** Scroll con borde fino y fondo oscuro, para tablas y listas. */
+    public static JScrollPane scroll(java.awt.Component contenido) {
+        JScrollPane scroll = new JScrollPane(contenido);
+        scroll.setBorder(BorderFactory.createLineBorder(BORDE, 1));
+        scroll.getViewport().setBackground(CAMPO);
+        return scroll;
+    }
+
     /** Borde de las tarjetas y paneles: franja cian arriba, linea fina alrededor y aire adentro. */
     public static Border bordePanel() {
         return BorderFactory.createCompoundBorder(
@@ -157,12 +255,20 @@ public final class Tema {
                 BorderFactory.createLineBorder(color, 1),
                 BorderFactory.createEmptyBorder(10, 18, 10, 18)));
         boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        // deshabilitado se ve apagado; habilitado vuelve a su color
+        boton.addPropertyChangeListener("enabled", e -> {
+            boolean activo = boton.isEnabled();
+            boton.setBackground(activo ? (relleno ? color : PANEL) : PANEL);
+            boton.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(activo ? color : BORDE, 1),
+                    BorderFactory.createEmptyBorder(10, 18, 10, 18)));
+        });
         // al pasar el mouse se aclara un poco
         Color normal = boton.getBackground();
         Color encima = relleno ? color.brighter() : BORDE;
         boton.addMouseListener(new MouseAdapter() {
-            @Override public void mouseEntered(MouseEvent e) { boton.setBackground(encima); }
-            @Override public void mouseExited(MouseEvent e)  { boton.setBackground(normal); }
+            @Override public void mouseEntered(MouseEvent e) { if (boton.isEnabled()) boton.setBackground(encima); }
+            @Override public void mouseExited(MouseEvent e)  { if (boton.isEnabled()) boton.setBackground(normal); }
         });
         return boton;
     }
