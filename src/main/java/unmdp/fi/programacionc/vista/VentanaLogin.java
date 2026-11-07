@@ -1,6 +1,7 @@
 package unmdp.fi.programacionc.vista;
 
-import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -8,37 +9,64 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import java.awt.Dimension;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 
 /**
- * Pantalla de acceso: solo muestra campos y botones. No tiene logica.
+ * Pantalla de acceso: una tarjeta centrada sobre el fondo espacial.
+ * Solo muestra campos y botones. No tiene logica: todo lo decide el controlador.
  */
 public class VentanaLogin extends JFrame implements IVistaLogin {
 
-    private final JTextField campoUsuario = new JTextField(20);
-    private final JPasswordField campoContrasenia = new JPasswordField(20);
-    private final JButton botonIngresar = new JButton("Ingresar");
-    private final JButton botonRegistrarse = new JButton("Registrarse");
+    private final JTextField campoUsuario = Tema.campoTexto();
+    private final JPasswordField campoContrasenia = Tema.campoContrasenia();
+    private final JButton botonIngresar = Tema.botonPrimario("Ingresar");
+    private final JButton botonRegistrarse = Tema.botonSecundario("Registrarse");
 
     public VentanaLogin() {
-        super("Acceso al sistema");
+        super("Software Embarcado - Acceso al sistema");
         botonIngresar.setActionCommand(INGRESAR);
         botonRegistrarse.setActionCommand(REGISTRARSE);
 
-        JPanel panel = new JPanel(new GridLayout(3, 2, 8, 8));
-        panel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-        panel.add(new JLabel("Usuario:"));
-        panel.add(campoUsuario);
-        panel.add(new JLabel("Contrasenia:"));
-        panel.add(campoContrasenia);
-        panel.add(botonIngresar);
-        panel.add(botonRegistrarse);
+        // Fondo que ocupa toda la ventana; la tarjeta queda centrada (GridBagLayout sin restricciones)
+        FondoEspacial fondo = new FondoEspacial(new GridBagLayout());
+        fondo.add(crearTarjeta());
 
-        setContentPane(panel);
+        setContentPane(fondo);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        pack();
+        setSize(820, 560);
+        setMinimumSize(new Dimension(520, 480));
         setLocationRelativeTo(null);
+        getRootPane().setDefaultButton(botonIngresar);   // Enter = Ingresar
+    }
+
+    private JPanel crearTarjeta() {
+        JPanel tarjeta = new JPanel();
+        tarjeta.setLayout(new BoxLayout(tarjeta, BoxLayout.Y_AXIS));
+        tarjeta.setBackground(Tema.PANEL);
+        tarjeta.setBorder(Tema.bordePanel());
+
+        JPanel botones = new JPanel(new GridLayout(1, 2, 12, 0));
+        botones.setOpaque(false);
+        botones.add(botonIngresar);
+        botones.add(botonRegistrarse);
+
+        tarjeta.add(Tema.izquierda(Tema.titulo("ACCESO AL SISTEMA")));
+        tarjeta.add(Box.createVerticalStrut(4));
+        tarjeta.add(Tema.izquierda(Tema.subtitulo("Identificate para tomar el mando de la nave")));
+        tarjeta.add(Box.createVerticalStrut(24));
+        tarjeta.add(Tema.izquierda(Tema.etiqueta("Usuario")));
+        tarjeta.add(Box.createVerticalStrut(6));
+        tarjeta.add(Tema.izquierda(campoUsuario));
+        tarjeta.add(Box.createVerticalStrut(16));
+        tarjeta.add(Tema.izquierda(Tema.etiqueta("Contraseña")));
+        tarjeta.add(Box.createVerticalStrut(6));
+        tarjeta.add(Tema.izquierda(campoContrasenia));
+        tarjeta.add(Box.createVerticalStrut(24));
+        tarjeta.add(Tema.izquierda(botones));
+        return tarjeta;
     }
 
     @Override public String getUsuario()     { return campoUsuario.getText(); }
