@@ -23,12 +23,12 @@ public class VentanaLogin extends JFrame implements IVistaLogin {
     private final JTextField campoUsuario = Tema.campoTexto();
     private final JPasswordField campoContrasenia = Tema.campoContrasenia();
     private final JButton botonIngresar = Tema.botonPrimario("Ingresar");
-    private final JButton botonRegistrarse = Tema.botonSecundario("Registrarse");
+    private final JButton botonRegistrarse = Tema.botonSecundario("Crear cuenta");
 
     public VentanaLogin() {
         super("Software Embarcado - Acceso al sistema");
         botonIngresar.setActionCommand(INGRESAR);
-        botonRegistrarse.setActionCommand(REGISTRARSE);
+        botonRegistrarse.setActionCommand(IR_A_REGISTRO);
 
         // Fondo que ocupa toda la ventana; la tarjeta queda centrada (GridBagLayout sin restricciones)
         FondoEspacial fondo = new FondoEspacial(new GridBagLayout());
@@ -94,6 +94,14 @@ public class VentanaLogin extends JFrame implements IVistaLogin {
         botonRegistrarse.addActionListener(listener);
     }
 
+    @Override
+    public void setUsuario(String usuario) {
+        campoUsuario.setText(usuario);
+        campoContrasenia.setText("");
+        campoContrasenia.requestFocusInWindow();
+    }
+
     @Override public void mostrar() { setVisible(true); }
+    @Override public void ocultar() { setVisible(false); }
     @Override public void cerrar()  { dispose(); }
 }

@@ -5,6 +5,7 @@ import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 import unmdp.fi.programacionc.persistencia.ControlAcceso;
 import unmdp.fi.programacionc.universo.Universo;
 import unmdp.fi.programacionc.vista.IVistaLogin;
+import unmdp.fi.programacionc.vista.VentanaRegistro;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,13 +37,20 @@ public class ControladorLogin implements ActionListener {
         try {
             if (IVistaLogin.INGRESAR.equals(evento.getActionCommand())) {
                 ingresar(usuario, contrasenia);
-            } else if (IVistaLogin.REGISTRARSE.equals(evento.getActionCommand())) {
-                controlAcceso.registrar(usuario, contrasenia);
-                vista.mostrarMensaje("Usuario " + usuario + " registrado. Ya podes ingresar.");
+            } else if (IVistaLogin.IR_A_REGISTRO.equals(evento.getActionCommand())) {
+                abrirRegistro();
             }
         } catch (OperacionInvalidaException e) {
             vista.mostrarError(e.getMessage());
         }
+    }
+
+    /** Seleccion de vista: esconde el login y abre la vista de registro. Al volver, el login reaparece. */
+    private void abrirRegistro() {
+        vista.ocultar();
+        VentanaRegistro registro = new VentanaRegistro();
+        new ControladorRegistro(registro, controlAcceso, vista);
+        registro.mostrar();
     }
 
     private void ingresar(String usuario, String contrasenia) {
