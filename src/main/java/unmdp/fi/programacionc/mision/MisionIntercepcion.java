@@ -45,12 +45,13 @@ public class MisionIntercepcion extends Mision {
 
     @Override
     protected boolean verificarEnDestino() {
-        return getAsistente().getCombustible() >= pedidoCombustible
-                && getAsistente().getEnergia() >= pedidoEnergia;
+        return getAsistente().getCombustible() > pedidoCombustible
+                && getAsistente().getEnergia() > pedidoEnergia;
     }
     /**
-     * Exito: la asistencia se completo con recursos suficientes (ya consumidos en ejecutar())
-     * y la nave no fue destruida.
+     * Exito: la nave llego hasta la nave aliada y todavia conservaba los recursos a entregar
+     * (lo comprobo verificarEnDestino() al llegar). Si fue destruida en el camino o no le
+     * alcanzaban, la mision es FALLIDA. El descuento de lo entregado se hace en cerrar().
      */
     @Override
     protected ResultadoMision evaluar() {
