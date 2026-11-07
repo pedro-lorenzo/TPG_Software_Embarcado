@@ -66,4 +66,5 @@ public interface OperadorMision extends NavePropia{
 
     // ---- registro en la bitacora del asistente ----
     void registrarEvento(TipoEvento tipo, String descripcion);
+    void registrarInforme(InformeMision informe);
 }

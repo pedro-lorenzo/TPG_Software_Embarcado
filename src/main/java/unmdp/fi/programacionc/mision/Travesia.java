@@ -1,20 +1,26 @@
 package unmdp.fi.programacionc.mision;
 
+import java.util.List;
+
+import unmdp.fi.programacionc.bitacora.TipoEvento;
 import unmdp.fi.programacionc.destinoytablero.Destino;
 import unmdp.fi.programacionc.destinoytablero.Posicion;
 import unmdp.fi.programacionc.destinoytablero.Tablero;
-import unmdp.fi.programacionc.tablero.NavePropia;
-import unmdp.fi.programacionc.bitacora.TipoEvento;
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 import unmdp.fi.programacionc.tablero.ElementoDelUniverso;
+import unmdp.fi.programacionc.tablero.NavePropia;
 
 public class Travesia {
+
+    private static final int PAUSA_MS = 300;
 
     private final Tablero tablero;
     private final Destino destino;
     private final OperadorMision asistente;
     private final NavePropia nave;
-    private static final int PAUSA_MS = 300;
+
+    private int paso;                    // cantidad de casillas de la ruta ya recorridas
+    private boolean sinPoderAvanzar;
 
     public Travesia(Tablero tablero, Destino destino, OperadorMision asistente, NavePropia nave) {
         this.tablero = tablero;
@@ -24,19 +30,24 @@ public class Travesia {
     }
 
     /**
-     * Recorre el tablero turno a turno hacia el objetivo.
-     * @return true si la nave llegó al objetivo, false si fue destruida antes
+     * Recorre la ruta turno a turno.
+     * pre -> ruta != null (puede estar vacia)
+     * @return true si la nave completo la ruta; false si fue destruida o quedo sin poder avanzar
      */
-    public boolean recorrerHasta(Posicion objetivo) {
-        while (!asistente.estaDestruida() && !tablero.getPosicionNave().equals(objetivo)) {
-            turnoDeLaNave(objetivo);
-            destino.turnoDestino();
+    public boolean recorrer(List<Posicion> ruta) {
+        paso = 0;
+        sinPoderAvanzar = false;
+        while (!asistente.estaDestruida() && !sinPoderAvanzar && paso < ruta.size()) {
+            synchronized (tablero) {
+                turnoDeLaNave(ruta);
+                destino.turnoDestino();
+            }
             pausar();
         }
-        return !asistente.estaDestruida();
+        return !asistente.estaDestruida() && paso >= ruta.size();
     }
 
-    private void turnoDeLaNave(Posicion objetivo) {
+    private void turnoDeLaNave(List<Posicion> ruta) {
         Posicion actual = tablero.getPosicionNave();
 
         // 1. Inspección de la posición actual
@@ -50,30 +61,27 @@ public class Travesia {
         }
 
         // 2. Escaneo con el radar de corto alcance
-        Posicion siguiente = Ruta.pasoHacia(actual, objetivo);
+        Posicion siguiente = ruta.get(paso);
         ElementoDelUniverso[][] alrededores = tablero.observarAlrededores();
         int fila = 1 + (siguiente.getX() - actual.getX());
         int columna = 1 + (siguiente.getY() - actual.getY());
         boolean hayObstaculo = alrededores[fila][columna] != null;
+        boolean quedanDosCasillas = ruta.size() - paso > 1;
 
         // 3. Planificación y movimiento
         int avanzados;
         try {
-            if (hayObstaculo && Ruta.distanciaA(actual, objetivo) > 1) {
+            if (hayObstaculo && quedanDosCasillas) {
                 avanzados = asistente.saltarWarp();
             } else {
                 avanzados = asistente.saltar();
             }
         } catch (OperacionInvalidaException e) {
-            nave.destruir("sin combustible para seguir saltando");
+            sinPoderAvanzar = true;
             return;
         }
-
-        Posicion nueva = actual;
-        for (int i = 0; i < avanzados; i++) {
-            nueva = Ruta.pasoHacia(nueva, objetivo);
-        }
-        tablero.moverNave(nueva);
+        paso += avanzados;
+        tablero.moverNave(ruta.get(paso - 1));
     }
 
     private void pausar() {

@@ -1,6 +1,8 @@
 package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.destinoytablero.Posicion;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Ruta en L sobre el tablero de la catedra: primero se avanza en X hasta igualar la del
@@ -32,5 +34,20 @@ public final class Ruta {
     public static int distanciaA(Posicion origen, Posicion destino) {
         assert origen != null && destino != null : "Origen y destino no pueden ser nulos";
         return Math.abs(destino.getX() - origen.getX()) + Math.abs(destino.getY() - origen.getY());
+    }
+    /**
+     * Ruta completa en L: las casillas a recorrer, sin la de origen, terminando en el destino.
+     * pre -> origen y destino != null
+     * post -> vacia si origen y destino son la misma casilla
+     * post -> su tamaño es distanciaA(origen, destino)
+     */
+    public static List<Posicion> calcular(Posicion origen, Posicion destino) {
+        List<Posicion> pasos = new ArrayList<>();
+        Posicion actual = origen;
+        while (!actual.equals(destino)) {
+            actual = pasoHacia(actual, destino);
+            pasos.add(actual);
+        }
+        return pasos;
     }
 }

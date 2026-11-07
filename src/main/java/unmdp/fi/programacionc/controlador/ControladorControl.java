@@ -7,6 +7,7 @@ import unmdp.fi.programacionc.comando.Asistente;
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 import unmdp.fi.programacionc.nave.Nave;
 import unmdp.fi.programacionc.vista.IVistaControl;
+import unmdp.fi.programacionc.mision.InformeMision;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -92,37 +93,21 @@ public class ControladorControl implements ActionListener, ObservadorSesion {
     public void sesionActualizada() {
         if (!sesion.tieneNave()) {
             vista.sinNave();
+            vista.mostrarInformes(new ArrayList<>());
             vista.habilitarAcciones(false);
             return;
         }
         Nave nave = sesion.getNaveActual();
         Asistente asistente = nave.getAsistente();
 
-        String general;
-        boolean alerta;
-        if (asistente.estaDestruida()) {
-            general = "Nave destruida";
-            alerta = true;
-        } else if (asistente.necesitaMantenimiento()) {
-            general = "Requiere mantenimiento";
-            alerta = true;
-        } else if (!nave.tieneTripulacionValida()) {
-            general = "Tripulacion incompleta";
-            alerta = true;
-        } else {
-            general = "Operativa";
-            alerta = false;
-        }
-        vista.mostrarNave("Nave #" + nave.getId() + " - " + nave.getTipo(), asistente.getEstadoMotor(), general, alerta);
-        vista.mostrarRecursos(asistente.getCombustible(), asistente.getEnergia(), asistente.getDesgaste(),
-                asistente.necesitaMantenimiento(), asistente.getGemas());
+        // ... (todo igual hasta vista.mostrarBitacora(lineas);)
 
-        List<String> lineas = new ArrayList<>();
-        for (EventoBitacora e : asistente.getEventos()) {
-            lineas.add(String.format("#%-3d %s  [%s]  %s", e.getNumero(), e.getFecha().format(HORA),
-                    e.getTipo(), e.getDescripcion()));
+        List<String> informes = new ArrayList<>();
+        for (InformeMision informe : asistente.getInformes()) {
+            informes.add(informe.getCodigo() + " - " + informe.resumen());
         }
-        vista.mostrarBitacora(lineas);
+        vista.mostrarInformes(informes);
+
         vista.habilitarAcciones(!asistente.estaDestruida());
     }
 }

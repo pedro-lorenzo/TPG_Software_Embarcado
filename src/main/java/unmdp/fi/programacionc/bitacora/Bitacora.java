@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Bitacora de un asistente de comando (Aclaracion R5): eventos en orden temporal, con cuando
@@ -12,11 +13,15 @@ import java.util.List;
  * Solo permite agregar eventos: no hay forma de borrarlos ni editarlos, y cada evento es inmutable.
  * No imprime nada: la presentacion queda a cargo de quien la consulta (Main o la futura interfaz).
  *
+ * Es segura entre hilos: la mision registra eventos desde su propio hilo mientras la interfaz
+ * los lee. La lista es concurrente (recorrerla nunca falla aunque se agreguen eventos) y
+ * registrar() es synchronized para que el numero de secuencia no se repita ni se salteee.
+ *
  * inv -> los eventos estan ordenados por numero de secuencia creciente, empezando en 1
  */
 public class Bitacora {
 
-    private final List<EventoBitacora> eventos = new ArrayList<>();
+    private final List<EventoBitacora> eventos = new CopyOnWriteArrayList<>();
     private long proximoNumero = 1;
 
     /**
@@ -27,7 +32,7 @@ public class Bitacora {
      * pre -> descripcion != null y no vacia
      * post -> el evento queda al final, con el siguiente numero de secuencia y la fecha actual
      */
-    public void registrar(TipoEvento tipo, String descripcion) {
+    public synchronized void registrar(TipoEvento tipo, String descripcion) {
         assert tipo != null : "El tipo de evento no puede ser nulo";
         assert descripcion != null && !descripcion.trim().isEmpty() : "La descripcion del evento no puede ser nula ni vacia";
         this.eventos.add(new EventoBitacora(this.proximoNumero++, LocalDateTime.now(), tipo, descripcion));

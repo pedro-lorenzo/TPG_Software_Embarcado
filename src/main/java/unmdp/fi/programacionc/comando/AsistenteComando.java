@@ -10,8 +10,10 @@ import unmdp.fi.programacionc.tablero.Combatiente;
 import unmdp.fi.programacionc.tablero.NaveEnemiga;
 import unmdp.fi.programacionc.tablero.ResultadoBatalla;
 import unmdp.fi.programacionc.tripulacion.Tripulante;
+import unmdp.fi.programacionc.mision.InformeMision;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Asistente de Comando (E1-03): implementacion de Asistente. Opera UNA sola nave:
@@ -42,6 +44,7 @@ public class AsistenteComando implements Asistente {
     private int gemas = 0;
     private boolean destruida = false;
     private String motivoDestruccion;
+    private final List<InformeMision> informes = new CopyOnWriteArrayList<>();
 
     /**
      * Lo crea la fabrica de naves, que le pasa los componentes de la nave que va a operar.
@@ -77,6 +80,8 @@ public class AsistenteComando implements Asistente {
     @Override
     public List<EventoBitacora> getEventos()  { return bitacora.getEventos(); }
 
+    @Override
+    public List<InformeMision> getInformes() { return informes; }
     /**
      * Lo llama la fabrica una sola vez, al armar la nave.
      * pre -> combatiente != null
@@ -341,5 +346,10 @@ public class AsistenteComando implements Asistente {
     private String estadoRecursos() {
         return "combustible " + tanque.getCombustible() + ", energia " + tanque.getEnergia()
                 + ", desgaste " + tanque.getDesgaste();
+    }
+    @Override
+    public void registrarInforme(InformeMision informe) {
+        assert informe != null : "El informe no puede ser nulo";
+        informes.add(informe);
     }
 }

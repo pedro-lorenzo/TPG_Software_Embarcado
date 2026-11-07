@@ -17,6 +17,7 @@ public interface IVistaControl {
     void mostrarNave(String titulo, String estadoMotor, String estadoGeneral, boolean alerta);
     void mostrarRecursos(int combustible, int energia, int desgaste, boolean desgasteEnAlerta, int gemas);
     void mostrarBitacora(List<String> lineas);
+    void mostrarInformes(List<String> lineas);
     void sinNave();
 
     String getCantidad();

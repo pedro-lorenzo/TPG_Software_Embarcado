@@ -36,6 +36,7 @@ public class PanelControl extends JPanel implements IVistaControl {
     private final JButton botonMantenimiento = Tema.botonSecundario("Realizar mantenimiento");
 
     private final JTextArea bitacora = new JTextArea();
+    private final JTextArea historialInformes = new JTextArea();
 
     public PanelControl() {
         super(new BorderLayout(16, 0));
@@ -52,7 +53,11 @@ public class PanelControl extends JPanel implements IVistaControl {
         izquierda.add(Box.createVerticalStrut(16));
         izquierda.add(crearTarjetaOrdenes());
         add(izquierda, BorderLayout.WEST);
-        add(crearTarjetaBitacora(), BorderLayout.CENTER);
+        JPanel derecha = new JPanel(new GridLayout(2, 1, 0, 16));
+        derecha.setOpaque(false);
+        derecha.add(crearTarjetaBitacora());
+        derecha.add(crearTarjetaInformes());
+        add(derecha, BorderLayout.CENTER);
     }
 
     private JPanel crearTarjetaEstado() {
@@ -109,7 +114,23 @@ public class PanelControl extends JPanel implements IVistaControl {
         tarjeta.add(Tema.izquierda(scroll));
         return tarjeta;
     }
-
+    private JPanel crearTarjetaInformes() {
+        JPanel tarjeta = Tema.tarjeta();
+        tarjeta.add(Tema.izquierda(Tema.titulo("INFORMES DE MISION")));
+        tarjeta.add(Box.createVerticalStrut(4));
+        tarjeta.add(Tema.izquierda(Tema.subtitulo("Resultado y balance de cada mision")));
+        tarjeta.add(Box.createVerticalStrut(14));
+        historialInformes.setEditable(false);
+        historialInformes.setFont(Tema.CONSOLA);
+        historialInformes.setBackground(Tema.CAMPO);
+        historialInformes.setForeground(Tema.TEXTO);
+        historialInformes.setLineWrap(true);
+        historialInformes.setWrapStyleWord(true);
+        historialInformes.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+        JScrollPane scroll = Tema.scroll(historialInformes);
+        tarjeta.add(Tema.izquierda(scroll));
+        return tarjeta;
+    }
     // ===================== IVistaControl =====================
 
     @Override
@@ -132,6 +153,12 @@ public class PanelControl extends JPanel implements IVistaControl {
     public void mostrarBitacora(List<String> lineas) {
         bitacora.setText(String.join("\n", lineas));
         bitacora.setCaretPosition(bitacora.getDocument().getLength());   // siempre lo ultimo a la vista
+    }
+
+    @Override
+    public void mostrarInformes(List<String> lineas) {
+        historialInformes.setText(String.join("\n\n", lineas));
+        historialInformes.setCaretPosition(historialInformes.getDocument().getLength());
     }
 
     @Override
