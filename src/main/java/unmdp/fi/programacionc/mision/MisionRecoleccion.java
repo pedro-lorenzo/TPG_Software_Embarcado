@@ -23,8 +23,8 @@ public class MisionRecoleccion extends Mision {
     /**
      * pre -> asistente != null (lo verifica Mision)
      */
-    public MisionRecoleccion(OperadorMision asistente) {
-        this(asistente, new Random());
+    public MisionRecoleccion(OperadorMision asistente, Tablero tablero, Destino destino) {
+        this(asistente, new Random(), tablero, destino);
     }
 
     /**

@@ -2,6 +2,7 @@ package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.bitacora.TipoEvento;
 import unmdp.fi.programacionc.destinoytablero.Destino;
+import unmdp.fi.programacionc.destinoytablero.Posicion;
 import unmdp.fi.programacionc.destinoytablero.Tablero;
 
 /**
@@ -62,5 +63,10 @@ public class MisionRetornoSeguro extends Mision {
                 mensaje = "no se realizo: " + motivo;
         }
         getAsistente().registrarEvento(TipoEvento.MISION, getCodigo() + " cerrada [" + resultado + "] " + mensaje);
+    }
+
+    @Override
+    protected Posicion calcularObjetivo(Tablero tablero) {
+        return new Posicion(tablero.getX() / 2, tablero.getY() / 2);
     }
 }
