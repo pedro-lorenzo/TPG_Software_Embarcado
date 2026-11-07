@@ -4,10 +4,12 @@ import unmdp.fi.programacionc.aplicacion.Sesion;
 import unmdp.fi.programacionc.concurrencia.modelo.UniversoParalelo;
 import unmdp.fi.programacionc.vista.PanelControl;
 import unmdp.fi.programacionc.vista.PanelCreacion;
+import unmdp.fi.programacionc.vista.PanelMision;
 import unmdp.fi.programacionc.vista.PanelTripulantes;
 import unmdp.fi.programacionc.vista.PanelVisor;
 import unmdp.fi.programacionc.vista.VentanaPrincipal;
 
+import javax.swing.SwingUtilities;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -25,6 +27,8 @@ public class ControladorPrincipal {
     public ControladorPrincipal(Sesion sesion) {
         assert sesion != null : "El controlador principal necesita la sesion";
         this.ventana = new VentanaPrincipal(sesion.getUsuario());
+        // La mision corre en otro hilo: sus avisos se pasan al hilo de Swing antes de tocar la pantalla
+        sesion.setDespachador(SwingUtilities::invokeLater);
         // Cada seccion: su panel (vista) y su controlador, que se engancha a la vista y al modelo
         PanelCreacion creacion = new PanelCreacion();
         new ControladorCreacion(creacion, sesion);
@@ -35,6 +39,9 @@ public class ControladorPrincipal {
         PanelControl control = new PanelControl();
         new ControladorControl(control, sesion);
         ventana.agregarSeccion("Control de la nave", control);
+        PanelMision mision = new PanelMision();
+        new ControladorMision(mision, sesion);
+        ventana.agregarSeccion("Mision", mision);
         PanelVisor visor = new PanelVisor();
         UniversoParalelo universoParalelo = new UniversoParalelo();
         new ControladorVisor(visor, universoParalelo);
