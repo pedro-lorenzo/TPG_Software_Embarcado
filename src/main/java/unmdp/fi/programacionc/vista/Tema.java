@@ -71,6 +71,17 @@ public final class Tema {
         UIManager.put("ComboBox.disabledBackground", CAMPO);
         UIManager.put("ComboBox.disabledForeground", TEXTO_SUAVE);
         UIManager.put("Button.disabledText", TEXTO_SUAVE);
+        // barras de desplazamiento oscuras
+        UIManager.put("ScrollBar.background", CAMPO);
+        UIManager.put("ScrollBar.track", CAMPO);
+        UIManager.put("ScrollBar.thumb", BORDE);
+        UIManager.put("ScrollBar.thumbHighlight", BORDE);
+        UIManager.put("ScrollBar.thumbShadow", BORDE);
+        UIManager.put("ScrollBar.thumbDarkShadow", BORDE);
+        UIManager.put("ScrollBar.shadow", CAMPO);
+        UIManager.put("ScrollBar.darkShadow", CAMPO);
+        UIManager.put("ScrollBar.highlight", CAMPO);
+        UIManager.put("ScrollBar.width", 10);
     }
 
     public static JLabel titulo(String texto) {

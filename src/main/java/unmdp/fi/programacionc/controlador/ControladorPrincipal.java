@@ -1,11 +1,15 @@
 package unmdp.fi.programacionc.controlador;
 
 import unmdp.fi.programacionc.aplicacion.Sesion;
+import unmdp.fi.programacionc.concurrencia.modelo.UniversoParalelo;
 import unmdp.fi.programacionc.vista.PanelControl;
 import unmdp.fi.programacionc.vista.PanelCreacion;
-import unmdp.fi.programacionc.vista.PanelEnConstruccion;
 import unmdp.fi.programacionc.vista.PanelTripulantes;
+import unmdp.fi.programacionc.vista.PanelVisor;
 import unmdp.fi.programacionc.vista.VentanaPrincipal;
+
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * Arma la ventana principal: crea cada seccion con su controlador y las agrega como pestanias.
@@ -21,7 +25,7 @@ public class ControladorPrincipal {
     public ControladorPrincipal(Sesion sesion) {
         assert sesion != null : "El controlador principal necesita la sesion";
         this.ventana = new VentanaPrincipal(sesion.getUsuario());
-        // Por ahora vacias: se van reemplazando por la seccion real (panel + controlador) una por una
+        // Cada seccion: su panel (vista) y su controlador, que se engancha a la vista y al modelo
         PanelCreacion creacion = new PanelCreacion();
         new ControladorCreacion(creacion, sesion);
         ventana.agregarSeccion("Creacion", creacion);
@@ -31,7 +35,18 @@ public class ControladorPrincipal {
         PanelControl control = new PanelControl();
         new ControladorControl(control, sesion);
         ventana.agregarSeccion("Control de la nave", control);
-        ventana.agregarSeccion("Visor", new PanelEnConstruccion("Visor"));
+        PanelVisor visor = new PanelVisor();
+        UniversoParalelo universoParalelo = new UniversoParalelo();
+        new ControladorVisor(visor, universoParalelo);
+        ventana.agregarSeccion("Visor", visor);
+
+        // Al cerrar la ventana se detienen los hilos del universo paralelo
+        ventana.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                universoParalelo.detener();
+            }
+        });
     }
 
     public void mostrar() {
