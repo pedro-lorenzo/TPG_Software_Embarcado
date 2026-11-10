@@ -36,5 +36,7 @@ public abstract class NaveEnemiga implements ElementoDelUniverso {
         return "Encuentro con " + nombre + ": " + resultado;
     }
 
+    @Override public boolean esObstaculo() { return false; }
+
     public String getNombre() { return nombre; }
 }

@@ -10,4 +10,7 @@ public interface ElementoDelUniverso {
 
     /** Caracter para dibujar el elemento en el tablero. */
     char getSimbolo();
+
+    /** Indica si el radar lo detecta como un obstaculo que conviene esquivar con el salto Warp. */
+    boolean esObstaculo();
 }

@@ -13,4 +13,5 @@ public class EstacionDeCarga implements ElementoDelUniverso {
     }
 
     @Override public char getSimbolo() { return 'E'; }
+    @Override public boolean esObstaculo() { return false; }
 }

@@ -12,4 +12,5 @@ public class Asteroide implements ElementoDelUniverso {
     }
 
     @Override public char getSimbolo() { return 'A'; }
+    @Override public boolean esObstaculo() { return true; }
 }
