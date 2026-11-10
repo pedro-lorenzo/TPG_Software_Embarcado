@@ -100,15 +100,16 @@ public abstract class Mision {
         int combustibleAntes = asistente.getCombustible();
         int energiaAntes = asistente.getEnergia();
         int desgasteAntes = asistente.getDesgaste();
-        int gemasAntes = asistente.getGemas();
         cerrar(resultado, motivo);
+        int gemasObtenidas = gemasObtenidas();
+        int gemasPerdidas = gemasPerdidas();
 
         InformeMision informe = new InformeMision(codigo, nombre, resultado, ruta,
                 combustibleConsumido, energiaConsumida, desgasteProducido,
                 asistente.getCombustible() - combustibleAntes,
                 asistente.getEnergia() - energiaAntes,
                 asistente.getDesgaste() - desgasteAntes,
-                asistente.getGemas() - gemasAntes,
+                gemasObtenidas, gemasPerdidas,
                 asistente.getEstadoMotor(), observaciones);
         asistente.registrarInforme(informe);
         asistente.registrarEvento(TipoEvento.MISION, codigo + " informe: " + informe.resumen());
@@ -219,6 +220,12 @@ public abstract class Mision {
      * pre -> motivo != null si y solo si resultado == RECHAZADA
      */
     protected abstract void cerrar(ResultadoMision resultado, String motivo);
+
+    /** Gemas ganadas por la mision; se consulta despues de cerrar(). Por defecto 0. */
+    protected int gemasObtenidas() { return 0; }
+
+    /** Gemas que no entraron en el tanque al canjear; se consulta despues de cerrar(). Por defecto 0. */
+    protected int gemasPerdidas() { return 0; }
 
     /**
      * Calcula la coordenada de destino de esta mision (radar de largo alcance).

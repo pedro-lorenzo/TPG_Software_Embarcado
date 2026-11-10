@@ -21,13 +21,15 @@ public class InformeMision {
     private final int cierreCombustible;
     private final int cierreEnergia;
     private final int cierreDesgaste;
-    private final int cierreGemas;
+    private final int gemasObtenidas;
+    private final int gemasPerdidas;
     private final String estadoMotor;
     private final String observaciones;
 
     public InformeMision(String codigo, String nombre, ResultadoMision resultado, List<Posicion> ruta,
                          int combustibleConsumido, int energiaConsumida, int desgasteProducido,
-                         int cierreCombustible, int cierreEnergia, int cierreDesgaste, int cierreGemas,
+                         int cierreCombustible, int cierreEnergia, int cierreDesgaste,
+                         int gemasObtenidas, int gemasPerdidas,
                          String estadoMotor, String observaciones) {
         this.codigo = codigo;
         this.nombre = nombre;
@@ -39,7 +41,8 @@ public class InformeMision {
         this.cierreCombustible = cierreCombustible;
         this.cierreEnergia = cierreEnergia;
         this.cierreDesgaste = cierreDesgaste;
-        this.cierreGemas = cierreGemas;
+        this.gemasObtenidas = gemasObtenidas;
+        this.gemasPerdidas = gemasPerdidas;
         this.estadoMotor = estadoMotor;
         this.observaciones = observaciones;
     }
@@ -51,7 +54,9 @@ public class InformeMision {
     public int getCombustibleConsumido()    { return combustibleConsumido; }
     public int getEnergiaConsumida()        { return energiaConsumida; }
     public int getDesgasteProducido()       { return desgasteProducido; }
-    public String getEstadoMotor()          { return estadoMotor; }
+    public int getGemasObtenidas()          { return gemasObtenidas; }
+    public int getGemasPerdidas()           { return gemasPerdidas; }
+    public String getEstadoMotor()         { return estadoMotor; }
     public String getObservaciones()        { return observaciones; }
 
     /** Texto de una linea para la bitacora y para el historial de la pantalla. */
@@ -65,7 +70,7 @@ public class InformeMision {
                 + " | cierre: combustible " + signado(cierreCombustible)
                 + ", energia " + signado(cierreEnergia)
                 + ", desgaste " + signado(cierreDesgaste)
-                + ", gemas " + signado(cierreGemas)
+                + ", gemas obtenidas=" + gemasObtenidas + ", gemas perdidas=" + gemasPerdidas
                 + " | motor=" + estadoMotor
                 + " | observaciones=" + (observaciones == null ? "ninguna" : observaciones);
     }

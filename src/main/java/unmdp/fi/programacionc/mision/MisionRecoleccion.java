@@ -19,6 +19,8 @@ public class MisionRecoleccion extends Mision {
     private static final int GEMAS_MAXIMAS = 100;
 
     private final Random azar;
+    private int gemasObtenidas;
+    private int gemasPerdidas;
 
     /**
      * pre -> asistente != null (lo verifica Mision)
@@ -66,8 +68,11 @@ public class MisionRecoleccion extends Mision {
                 getAsistente().agregarGemas(gemas);
                 getAsistente().canjearGemas();
                 int canjeado = getAsistente().getCombustible() - combustibleAntes;
+                gemasObtenidas = gemas;
+                gemasPerdidas = gemas - canjeado;
                 mensaje = "muestra registrada como obtenida; gemas obtenidas: " + gemas
-                        + ", canjeadas por " + canjeado + " de combustible";
+                        + ", canjeadas por " + canjeado + " de combustible"
+                        + (gemasPerdidas > 0 ? ", perdidas por tope del tanque: " + gemasPerdidas : "");
                 break;
             case FALLIDA:
                 mensaje = "no se pudo registrar la muestra";
@@ -77,6 +82,12 @@ public class MisionRecoleccion extends Mision {
         }
         getAsistente().registrarEvento(TipoEvento.MISION, getCodigo() + " cerrada [" + resultado + "] " + mensaje);
     }
+
+    @Override
+    protected int gemasObtenidas() { return gemasObtenidas; }
+
+    @Override
+    protected int gemasPerdidas() { return gemasPerdidas; }
 
     protected Posicion calcularObjetivo(Tablero tablero){
         return tablero.obtenerObjetivo();
