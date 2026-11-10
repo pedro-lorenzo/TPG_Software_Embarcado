@@ -12,7 +12,7 @@ import unmdp.fi.programacionc.tablero.NavePropia;
 
 public class Travesia {
 
-    private static final int PAUSA_MS = 300;
+    private static final int PAUSA_MS = 1000;
 
     private final Tablero tablero;
     private final Destino destino;
@@ -65,7 +65,8 @@ public class Travesia {
         ElementoDelUniverso[][] alrededores = tablero.observarAlrededores();
         int fila = 1 + (siguiente.getX() - actual.getX());
         int columna = 1 + (siguiente.getY() - actual.getY());
-        boolean hayObstaculo = alrededores[fila][columna] != null;
+        ElementoDelUniverso adelante = alrededores[fila][columna];
+        boolean hayObstaculo = adelante != null && adelante.esObstaculo();
         boolean quedanDosCasillas = ruta.size() - paso > 1;
 
         // 3. Planificación y movimiento
