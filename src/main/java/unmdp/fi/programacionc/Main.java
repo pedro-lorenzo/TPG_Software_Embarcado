@@ -1,9 +1,13 @@
 package unmdp.fi.programacionc;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import unmdp.fi.programacionc.bitacora.EventoBitacora;
 import unmdp.fi.programacionc.comando.Asistente;
+import unmdp.fi.programacionc.destinoytablero.Destino;
+import unmdp.fi.programacionc.destinoytablero.Tablero;
 import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 import unmdp.fi.programacionc.haberes.ComponenteHaber;
 import unmdp.fi.programacionc.haberes.LiquidadorHaberes;
@@ -72,9 +76,11 @@ public class Main {
                 + nave.getTripulantes().size() + " tripulantes");
         mostrarRecursos("Recursos iniciales", asistente);
 
-        ejecutar(new MisionIntercepcion(asistente), asistente);
-        ejecutar(new MisionRecoleccion(asistente), asistente);
-        ejecutar(new MisionRetornoSeguro(asistente), asistente);
+        Tablero tablero = tableroVacio();
+        Destino destino = new Destino(tablero);
+        ejecutar(new MisionIntercepcion(asistente, new Random(2), tablero, destino), asistente);
+        ejecutar(new MisionRecoleccion(asistente, new Random(1), tablero, destino), asistente);
+        ejecutar(new MisionRetornoSeguro(asistente, tablero, destino), asistente);
 
         mostrarRecursos("Recursos finales", asistente);
         mostrarBitacora(asistente);
@@ -88,17 +94,17 @@ public class Main {
         // B.1: el combustible no alcanza -> la mision se rechaza y la nave no cambia
         asistente.consumir(98, 0, 0);
         mostrarRecursos("Antes", asistente);
-        ejecutar(new MisionIntercepcion(asistente), asistente);
+        ejecutar(m01(asistente), asistente);
         mostrarRecursos("Despues (sin cambios)", asistente);
 
         // B.2: mantenimiento pendiente -> la mision se rechaza hasta realizarlo
         asistente.cargarCombustible(50);
         asistente.consumir(0, 0, Tanque.UMBRAL_MANTENIMIENTO);
         mostrarRecursos("Con mantenimiento pendiente", asistente);
-        ejecutar(new MisionIntercepcion(asistente), asistente);
+        ejecutar(m01(asistente), asistente);
         asistente.realizarMantenimiento();
         mostrarRecursos("Despues del mantenimiento", asistente);
-        ejecutar(new MisionIntercepcion(asistente), asistente);
+        ejecutar(m01(asistente), asistente);
 
         mostrarBitacora(asistente);
     }
@@ -212,5 +218,32 @@ public class Main {
     private static void titulo(String texto) {
         System.out.println();
         System.out.println("=== " + texto + " ===");
+    }
+
+    // ===================== MISIONES DE LA DEMO =====================
+    // Desde la Parte 2 cada mision recorre un tablero. Para la demo por consola alcanza
+    // con un tablero vacio de 20x20 (sin asteroides, estaciones ni enemigas).
+
+    private static Tablero tableroVacio() {
+        try {
+            return new Tablero(10, 10, new ArrayList<>());
+        } catch (Exception e) {
+            throw new IllegalStateException("No se pudo crear el tablero de la demo", e);
+        }
+    }
+
+    private static Mision m01(Asistente asistente) {
+        Tablero t = tableroVacio();
+        return new MisionIntercepcion(asistente, t, new Destino(t));
+    }
+
+    private static Mision m02(Asistente asistente) {
+        Tablero t = tableroVacio();
+        return new MisionRecoleccion(asistente, t, new Destino(t));
+    }
+
+    private static Mision m03(Asistente asistente) {
+        Tablero t = tableroVacio();
+        return new MisionRetornoSeguro(asistente, t, new Destino(t));
     }
 }

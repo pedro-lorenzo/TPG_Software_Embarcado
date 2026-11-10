@@ -1,6 +1,9 @@
 package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.bitacora.TipoEvento;
+import unmdp.fi.programacionc.destinoytablero.Destino;
+import unmdp.fi.programacionc.destinoytablero.Posicion;
+import unmdp.fi.programacionc.destinoytablero.Tablero;
 
 import java.util.Random;
 
@@ -20,16 +23,16 @@ public class MisionRecoleccion extends Mision {
     /**
      * pre -> asistente != null (lo verifica Mision)
      */
-    public MisionRecoleccion(OperadorMision asistente) {
-        this(asistente, new Random());
+    public MisionRecoleccion(OperadorMision asistente, Tablero tablero, Destino destino) {
+        this(asistente, new Random(), tablero, destino);
     }
 
     /**
      * pre -> asistente != null (lo verifica Mision)
      * pre -> azar != null
      */
-    public MisionRecoleccion(OperadorMision asistente, Random azar) {
-        super("M-02", "Recoleccion", "Llegar al punto simulado y obtener datos o muestra", asistente);
+    public MisionRecoleccion(OperadorMision asistente, Random azar, Tablero tablero, Destino destino) {
+        super("M-02", "Recoleccion", "Llegar al punto simulado y obtener datos o muestra", asistente, tablero, destino);
         assert azar != null : "El generador aleatorio no puede ser nulo";
         this.azar = azar;
     }
@@ -50,7 +53,7 @@ public class MisionRecoleccion extends Mision {
      */
     @Override
     protected ResultadoMision evaluar() {
-        return !getAsistente().estaDestruida() ? ResultadoMision.EXITOSA : ResultadoMision.FALLIDA;
+        return llegoAlDestino() ? ResultadoMision.EXITOSA : ResultadoMision.FALLIDA;
     }
 
     @Override
@@ -69,5 +72,9 @@ public class MisionRecoleccion extends Mision {
                 mensaje = "no se realizo: " + motivo;
         }
         getAsistente().registrarEvento(TipoEvento.MISION, getCodigo() + " cerrada [" + resultado + "] " + mensaje);
+    }
+
+    protected Posicion calcularObjetivo(Tablero tablero){
+        return tablero.obtenerObjetivo();
     }
 }

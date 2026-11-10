@@ -1,6 +1,7 @@
 package unmdp.fi.programacionc.mision;
 
 import unmdp.fi.programacionc.bitacora.TipoEvento;
+import unmdp.fi.programacionc.tablero.NavePropia;;
 
 /**
  * Lo que una mision puede consultar y ordenar a la nave, a traves de su asistente. Nada mas.
@@ -10,7 +11,7 @@ import unmdp.fi.programacionc.bitacora.TipoEvento;
  * comando el que depende de mision, no al reves (Inversion de Dependencias). Solo expone
  * lo que una mision usa (Segregacion de Interfaces).
  */
-public interface OperadorMision {
+public interface OperadorMision extends NavePropia{
 
     // ---- consultas ----
     boolean estaDisponible();
@@ -24,7 +25,7 @@ public interface OperadorMision {
     boolean estaDestruida();
 
     int getGemas();
-
+    String getMotivoDestruccion();
     // ---- ordenes (lanzan OperacionInvalidaException si la nave las rechaza) ----
     void consumir(int combustible, int energia, int desgaste);
     /**
@@ -65,4 +66,5 @@ public interface OperadorMision {
 
     // ---- registro en la bitacora del asistente ----
     void registrarEvento(TipoEvento tipo, String descripcion);
+    void registrarInforme(InformeMision informe);
 }

@@ -3,8 +3,10 @@ package unmdp.fi.programacionc.comando;
 import unmdp.fi.programacionc.bitacora.EventoBitacora;
 import unmdp.fi.programacionc.mision.OperadorMision;
 import unmdp.fi.programacionc.tablero.NavePropia;
+import unmdp.fi.programacionc.mision.InformeMision;
 
 import java.util.List;
+
 
 /**
  * Asistente de comando que opera una nave (Aclaracion R2): todo lo que se le puede consultar
@@ -27,4 +29,5 @@ public interface Asistente extends OperadorMision, NavePropia {
     void cargarCombustible(int carga);
     void cargarEnergia(int carga);
     void realizarMantenimiento();
+    List<InformeMision> getInformes();
 }
