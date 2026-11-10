@@ -78,8 +78,14 @@ public class Main {
 
         Tablero tablero = tableroVacio();
         Destino destino = new Destino(tablero);
+        System.out.println("-- Recarga total entre misiones --");
+        asistente.recargarTotal();
         ejecutar(new MisionIntercepcion(asistente, new Random(2), tablero, destino), asistente);
+        System.out.println("-- Recarga total entre misiones --");
+        asistente.recargarTotal();
         ejecutar(new MisionRecoleccion(asistente, new Random(1), tablero, destino), asistente);
+        System.out.println("-- Recarga total entre misiones --");
+        asistente.recargarTotal();
         ejecutar(new MisionRetornoSeguro(asistente, tablero, destino), asistente);
 
         mostrarRecursos("Recursos finales", asistente);
