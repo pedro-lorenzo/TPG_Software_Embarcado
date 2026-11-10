@@ -61,9 +61,13 @@ public class MisionRecoleccion extends Mision {
         String mensaje;
         switch (resultado) {
             case EXITOSA:
-                mensaje = "muestra registrada como obtenida";
-                getAsistente().agregarGemas(GEMAS_MINIMAS + azar.nextInt(GEMAS_MAXIMAS - GEMAS_MINIMAS + 1));
+                int gemas = GEMAS_MINIMAS + azar.nextInt(GEMAS_MAXIMAS - GEMAS_MINIMAS + 1);
+                int combustibleAntes = getAsistente().getCombustible();
+                getAsistente().agregarGemas(gemas);
                 getAsistente().canjearGemas();
+                int canjeado = getAsistente().getCombustible() - combustibleAntes;
+                mensaje = "muestra registrada como obtenida; gemas obtenidas: " + gemas
+                        + ", canjeadas por " + canjeado + " de combustible";
                 break;
             case FALLIDA:
                 mensaje = "no se pudo registrar la muestra";

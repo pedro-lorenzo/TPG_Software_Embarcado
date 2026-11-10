@@ -63,7 +63,7 @@ public class InformeMision {
                 + " | energia consumida=" + energiaConsumida
                 + " | desgaste producido=" + desgasteProducido
                 + " | cierre: combustible " + signado(cierreCombustible)
-                + ", energía " + signado(cierreEnergia)
+                + ", energia " + signado(cierreEnergia)
                 + ", desgaste " + signado(cierreDesgaste)
                 + ", gemas " + signado(cierreGemas)
                 + " | motor=" + estadoMotor
