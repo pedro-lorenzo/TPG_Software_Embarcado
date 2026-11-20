@@ -9,9 +9,12 @@ import unmdp.fi.programacionc.excepciones.OperacionInvalidaException;
 import unmdp.fi.programacionc.nave.Nave;
 import unmdp.fi.programacionc.tablero.ElementoDelUniverso;
 import unmdp.fi.programacionc.vista.IVistaMision;
+import unmdp.fi.programacionc.mision.InformeMision;
+import unmdp.fi.programacionc.mision.ResultadoMision;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 /**
  * Seccion de Mision.
@@ -86,7 +89,9 @@ public class ControladorMision implements ActionListener, ObservadorSesion {
             vista.mostrarEstado("Tripulacion incompleta", true);
             vista.habilitarInicio(false);
         } else {
-            vista.mostrarEstado("Lista para salir", false);
+            // Los recursos dependen de la ruta de cada mision (se calcula al preparar):
+            // no se promete nada, se informa como termino la ultima
+            mostrarEstadoParaSalir(asistente);
             vista.habilitarInicio(true);
         }
     }
@@ -114,5 +119,26 @@ public class ControladorMision implements ActionListener, ObservadorSesion {
         int xObjetivo = objetivo == null ? -1 : objetivo.getX();
         int yObjetivo = objetivo == null ? -1 : objetivo.getY();
         vista.mostrarTablero(celdas, nave.getX(), nave.getY(), xObjetivo, yObjetivo);
+    }
+
+    /**
+     * Estado cuando la nave puede intentar una mision. Los recursos que pide cada mision dependen de su
+     * ruta, que se calcula recien al preparar: por eso no se promete "lista", y se informa como termino
+     * la ultima mision (si fue rechazada, el motivo dice que faltaba).
+     */
+    private void mostrarEstadoParaSalir(Asistente asistente) {
+        List<InformeMision> informes = asistente.getInformes();
+        String aviso = asistente.necesitaMantenimiento()
+                ? "Requiere mantenimiento: solo puede salir a M-03"
+                : "Tripulacion completa: elegi una mision";
+        if (informes.isEmpty()) {
+            vista.mostrarEstado(aviso, asistente.necesitaMantenimiento());
+            return;
+        }
+        InformeMision ultimo = informes.get(informes.size() - 1);
+        boolean exitosa = ultimo.getResultado() == ResultadoMision.EXITOSA;
+        String detalle = ultimo.getObservaciones() == null ? "" : ": " + ultimo.getObservaciones();
+        vista.mostrarEstado(ultimo.getCodigo() + " " + ultimo.getResultado() + detalle + " | " + aviso,
+                !exitosa || asistente.necesitaMantenimiento());
     }
 }
