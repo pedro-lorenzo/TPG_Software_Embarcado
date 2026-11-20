@@ -1,5 +1,4 @@
 package unmdp.fi.programacionc.destinoytablero;
-
 import java.util.ArrayList;
 
 /** Base para objetos que notifican cambios a sus observadores. */
@@ -28,11 +27,13 @@ public abstract class Observable {
     }
 
     /**
-     * Notifica a los observadores registrados que este objeto se actualizó.
+     * Notifica a los observadores registrados que este objeto se actualizó,
+     * enviándoles un mensaje que describe lo ocurrido.
+     * @param mensaje texto que se envía a cada observador
      */
-    public void notificarObservadores() {
+    public void notificarObservadores(String mensaje) {
         for (Observador observador : observadores) {
-            observador.actualizar();
+            observador.actualizar(mensaje);
         }
     }
 }

@@ -21,7 +21,7 @@ public class GeneradoraDeEnergia extends EntidadParalela {
 
     @Override
     protected void ciclo() throws InterruptedException {
-        Thread.sleep(300 + azar.nextInt(400));          // tarda en producir (fuera del monitor)
+        Thread.sleep(700 + azar.nextInt(400));          // tarda en producir (fuera del monitor)
         getEmisor().emitir("Batería producida por " + getNombre() + ".");
         plataforma.depositar(getNombre());
     }

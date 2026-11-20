@@ -23,6 +23,6 @@ public class NaveConsumidora extends EntidadParalela {
     protected void ciclo() throws InterruptedException {
         getEmisor().emitir(getNombre() + " solicitando batería.");
         plataforma.retirar(getNombre());
-        Thread.sleep(500 + azar.nextInt(500));          // se abastece (fuera del monitor)
+        Thread.sleep(1500 + azar.nextInt(500));          // se abastece (fuera del monitor)
     }
 }

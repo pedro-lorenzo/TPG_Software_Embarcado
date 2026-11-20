@@ -1,6 +1,6 @@
+/** Indica que la cantidad de elementos supera la capacidad permitida del tablero. */
 package unmdp.fi.programacionc.destinoytablero;
 
-/** Indica que la cantidad de elementos supera la capacidad permitida del tablero. */
 public class CantidadDeElementosSuperaCasillaException extends Exception {
     /** Identificador de versión para la serialización. */
     private static final long serialVersionUID = 1L;

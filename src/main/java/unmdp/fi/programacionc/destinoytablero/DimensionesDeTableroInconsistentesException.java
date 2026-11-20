@@ -1,6 +1,6 @@
+/** Indica que alguna dimensión del tablero está fuera del rango permitido. */
 package unmdp.fi.programacionc.destinoytablero;
 
-/** Indica que alguna dimensión del tablero está fuera del rango permitido. */
 public class DimensionesDeTableroInconsistentesException extends Exception {
     /** Identificador de versión para la serialización. */
     private static final long serialVersionUID = 1L;

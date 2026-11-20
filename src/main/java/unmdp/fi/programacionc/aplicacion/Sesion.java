@@ -48,7 +48,7 @@ public class Sesion {
     public static final String MISION_RECOLECCION = "M-02";
     public static final String MISION_RETORNO = "M-03";
 
-    private static final int LADO_TABLERO = 20;
+    private static final int LADO_TABLERO = 8;
     private static final int CANTIDAD_ASTEROIDES = 15;
     private static final int CANTIDAD_ESTACIONES = 4;
     private static final int ENEMIGAS_POR_TIPO = 2;
@@ -235,7 +235,7 @@ public class Sesion {
         }
         destino = new Destino(tablero);
         // Cada turno del tablero refresca la pantalla (se avisa desde el hilo de la mision)
-        tablero.agregarObservador(() -> despachador.accept(this::notificar));
+        tablero.agregarObservador(mensaje -> despachador.accept(this::notificar));
     }
     // ===================== OBSERVER =====================
 

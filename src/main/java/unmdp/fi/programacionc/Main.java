@@ -232,7 +232,7 @@ public class Main {
 
     private static Tablero tableroVacio() {
         try {
-            return new Tablero(10, 10, new ArrayList<>());
+            return new Tablero(7, 7, new ArrayList<>());
         } catch (Exception e) {
             throw new IllegalStateException("No se pudo crear el tablero de la demo", e);
         }
