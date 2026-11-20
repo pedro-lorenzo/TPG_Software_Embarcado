@@ -110,6 +110,9 @@ public class ControladorMision implements ActionListener, ObservadorSesion {
                 }
             }
         }
-        vista.mostrarTablero(celdas, nave.getX(), nave.getY());
+        Posicion objetivo = sesion.getObjetivoMision();   // lo decide la mision en curso; null si no hay
+        int xObjetivo = objetivo == null ? -1 : objetivo.getX();
+        int yObjetivo = objetivo == null ? -1 : objetivo.getY();
+        vista.mostrarTablero(celdas, nave.getX(), nave.getY(), xObjetivo, yObjetivo);
     }
 }

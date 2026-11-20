@@ -16,7 +16,7 @@ public interface IVistaMision {
     /**
      * Dibuja el tablero. celdas[x][y] es el simbolo del elemento en esa casilla (' ' si esta vacia).
      */
-    void mostrarTablero(char[][] celdas, int xNave, int yNave);
+    void mostrarTablero(char[][] celdas, int xNave, int yNave, int xObjetivo, int yObjetivo);
     void limpiarTablero();
 
     void mostrarEstado(String texto, boolean alerta);

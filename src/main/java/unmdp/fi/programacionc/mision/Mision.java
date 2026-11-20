@@ -37,11 +37,11 @@ public abstract class Mision {
     private final OperadorMision asistente;
     private final Tablero tablero;
     private final Destino destino;
-    private Posicion objetivo;
     private boolean llegoAlDestino = false;
     private boolean finalizada = false;
     private List<Posicion> ruta = new ArrayList<>();
     private boolean destinoVerificado = false;
+    private volatile Posicion objetivo;   // lo escribe el hilo de la mision, lo lee el de Swing
 
     /**
      * pre -> codigo, nombre y descripcion no nulos ni vacios
@@ -261,4 +261,5 @@ public abstract class Mision {
     public String getNombre()       { return nombre; }
     public String getDescripcion()  { return descripcion; }
     public boolean estaFinalizada() { return finalizada; }
+    public Posicion getObjetivo() { return objetivo; }
 }

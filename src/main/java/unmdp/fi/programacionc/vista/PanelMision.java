@@ -90,7 +90,9 @@ public class PanelMision extends JPanel implements IVistaMision {
 
     @Override public int getMisionElegida() { return comboMision.getSelectedIndex(); }
 
-    @Override public void mostrarTablero(char[][] celdas, int xNave, int yNave) { tablero.mostrar(celdas, xNave, yNave); }
+    @Override public void mostrarTablero(char[][] celdas, int xNave, int yNave, int xObjetivo, int yObjetivo) {
+        tablero.mostrar(celdas, xNave, yNave, xObjetivo, yObjetivo);
+    }
     @Override public void limpiarTablero() { tablero.limpiar(); }
 
     @Override

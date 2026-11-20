@@ -21,6 +21,7 @@ import unmdp.fi.programacionc.tablero.EstacionDeCarga;
 import unmdp.fi.programacionc.tablero.NaveEnemigaCarguero;
 import unmdp.fi.programacionc.tablero.NaveEnemigaCombate;
 import unmdp.fi.programacionc.tablero.NaveEnemigaExploradora;
+import unmdp.fi.programacionc.destinoytablero.Posicion;
 import java.util.function.Consumer;
 
 import java.util.ArrayList;
@@ -48,14 +49,14 @@ public class Sesion {
     public static final String MISION_RECOLECCION = "M-02";
     public static final String MISION_RETORNO = "M-03";
 
-    private static final int LADO_TABLERO = 8;
+    private static final int LADO_TABLERO = 12;
     private static final int CANTIDAD_ASTEROIDES = 15;
     private static final int CANTIDAD_ESTACIONES = 4;
     private static final int ENEMIGAS_POR_TIPO = 2;
 
     private Tablero tablero;                  // null hasta que el operador crea una nave
     private Destino destino;
-    private volatile boolean misionEnCurso = false;
+    private volatile Mision misionEnCurso;   // null si no hay ninguna
     // Quien muestra la pantalla decide en que hilo se notifica (Swing: SwingUtilities::invokeLater)
     private Consumer<Runnable> despachador = Runnable::run;
     /**
@@ -75,7 +76,7 @@ public class Sesion {
 
     public boolean tieneNave() { return naveActual != null; }
 
-    public boolean hayMisionEnCurso() { return misionEnCurso; }
+    public boolean hayMisionEnCurso() { return misionEnCurso != null; }
 
     /** El tablero de la nave actual, para que la vista lo dibuje (leerlo dentro de synchronized (tablero)). */
     public Tablero getTablero() {
@@ -99,6 +100,15 @@ public class Sesion {
         return naveActual;
     }
 
+    /**
+     * Objetivo de la mision en curso, para que la pantalla lo marque.
+     * post -> null si no hay mision en curso o si todavia no calculo su objetivo
+     */
+    public Posicion getObjetivoMision() {
+        Mision mision = misionEnCurso;   // copia local: otro hilo puede ponerla en null entre el if y el uso
+        return mision == null ? null : mision.getObjetivo();
+    }
+
     // ===================== OPERACIONES =====================
 
     /**
@@ -109,7 +119,7 @@ public class Sesion {
      */
     public Nave crearNave(TipoNave tipo) {
         assert tipo != null : "Hay que indicar el tipo de nave";
-        if (misionEnCurso) {
+        if (hayMisionEnCurso()) {
             throw new OperacionInvalidaException("No se puede crear otra nave mientras hay una mision en curso");
         }
         Nave nave = NaveFactory.crear(tipo);
@@ -179,21 +189,21 @@ public class Sesion {
         if (!tieneNave()) {
             throw new OperacionInvalidaException("Primero hay que crear una nave");
         }
-        if (misionEnCurso) {
+        if (hayMisionEnCurso()) {
             throw new OperacionInvalidaException("Ya hay una mision en curso");
         }
         if (!naveActual.tieneTripulacionValida()) {
             throw new OperacionInvalidaException("La tripulacion esta incompleta");
         }
         Mision mision = crearMision(codigo);
-        misionEnCurso = true;
+        misionEnCurso = mision;
         notificar();
 
         Thread hilo = new Thread(() -> {
             try {
                 mision.ejecutarCiclo();
             } finally {
-                misionEnCurso = false;
+                misionEnCurso = null;
                 despachador.accept(this::notificar);
             }
         });
@@ -253,4 +263,5 @@ public class Sesion {
             observador.sesionActualizada();
         }
     }
+
 }

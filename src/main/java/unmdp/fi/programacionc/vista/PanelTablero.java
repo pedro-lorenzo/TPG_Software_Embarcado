@@ -8,6 +8,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.BasicStroke;
 
 /**
  * Dibuja el tablero de la mision: una grilla con un simbolo por casilla y la nave propia resaltada.
@@ -18,13 +19,15 @@ public class PanelTablero extends JComponent {
     private char[][] celdas = new char[0][0];
     private int xNave = -1;
     private int yNave = -1;
+    private int xObjetivo = -1;
+    private int yObjetivo = -1;
 
     public PanelTablero() {
         setPreferredSize(new Dimension(520, 520));
     }
 
     /** Guarda una copia de la foto del tablero y lo vuelve a dibujar. */
-    public void mostrar(char[][] celdas, int xNave, int yNave) {
+    public void mostrar(char[][] celdas, int xNave, int yNave, int xObjetivo, int yObjetivo) {
         char[][] copia = new char[celdas.length][];
         for (int i = 0; i < celdas.length; i++) {
             copia[i] = celdas[i].clone();
@@ -32,11 +35,13 @@ public class PanelTablero extends JComponent {
         this.celdas = copia;
         this.xNave = xNave;
         this.yNave = yNave;
+        this.xObjetivo = xObjetivo;
+        this.yObjetivo = yObjetivo;
         repaint();
     }
 
     public void limpiar() {
-        mostrar(new char[0][0], -1, -1);
+        mostrar(new char[0][0], -1, -1, -1, -1);
     }
 
     @Override
@@ -74,6 +79,16 @@ public class PanelTablero extends JComponent {
                     dibujarElemento(g2, fm, simbolo, x0 + x * lado, y0 + y * lado, lado);
                 }
             }
+        }
+
+        // objetivo
+        if (xObjetivo >= 0 && yObjetivo >= 0) {
+            int ox = x0 + xObjetivo * lado, oy = y0 + yObjetivo * lado;
+            g2.setColor(Tema.NARANJA);
+            g2.setStroke(new BasicStroke(2f));
+            int m = lado / 6;
+            g2.drawOval(ox + m, oy + m, lado - 2 * m, lado - 2 * m);                                      // aro
+            g2.fillOval(ox + lado / 2 - lado / 10, oy + lado / 2 - lado / 10, lado / 5, lado / 5);       // punto central
         }
 
         // nave propia
