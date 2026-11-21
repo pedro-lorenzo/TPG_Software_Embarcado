@@ -225,14 +225,17 @@ Ver la sección 2. Cada pantalla tiene su interfaz de vista, su controlador y co
 - **La nave no reenvía órdenes:** toda consulta u orden pasa por el asistente (R2).
 - **El asistente registra y relanza:** la bitácora conserva cada rechazo y quien dio la orden no pierde el error.
 - **Informe de misión como clase (Entrega 2):** en la Entrega 1 el informe era un evento de la bitácora (R5). La Parte 2 pide un historial de informes finales, así que se incorporó `InformeMision` (inmutable), que además se registra como evento en la bitácora. No hay dos fuentes de verdad: el informe se arma con las diferencias reales de recursos antes y después, no con constantes.
-- **Balance del cierre aparte:** el informe separa lo consumido en el recorrido de lo que cambia al cerrar (entrega de auxilio, canje de gemas, recarga), como indica el enunciado.
+- **El informe se arma después del cierre:** el enunciado ubica la confección del informe en `evaluar` y el impacto en la nave en `cerrar`. `evaluar()` decide el resultado y `cerrar()` impacta los recursos; el informe lo arma `ejecutarCiclo()` al final, para poder incluir también el balance del cierre. El orden preparar → ejecutar → evaluar → cerrar no cambia.
+- **Balance del cierre aparte:** el informe separa lo consumido en el recorrido (diferencia entre el inicio de la misión y la llegada) de lo que cambia al cerrar (entrega de auxilio, canje de gemas, recarga y mantenimiento).
 - **Verificación estricta en destino (M-01):** la nave debe conservar *más* de lo que entrega (`>`), para que la entrega no la deje en cero y la destruya.
-- **Recursos mínimos de la preparación:** el despegue más dos de combustible por cada paso de la ruta (el peor caso, sin warp). Si no alcanza, la misión se rechaza antes de modificar nada.
-- **Mantenimiento pendiente:** con desgaste ≥ 80 se rechaza toda misión salvo M-03, que justamente vuelve a la base a repararse.
-- **Destrucción de la nave:** desgaste 100, energía 0 o combustible 0 la destruyen y marcan fallecida a la tripulación (condición de `Tanque.estaAgotado()`, revisada por el asistente).
+- **Recursos mínimos de la preparación:** el combustible tiene que *superar* el despegue más dos por cada paso de la ruta (el peor caso, sin warp), y la energía tiene que *superar* la que pide la misión. No alcanza con tener lo justo, porque quedar en 0 destruye la nave. Además, el desgaste más el del despegue (4) tiene que quedar por debajo de 100. Si algo no se cumple, la misión se rechaza antes de modificar nada.
+- **Mantenimiento pendiente:** con desgaste ≥ 80 se rechaza toda misión salvo M-03, que justamente vuelve a la base a repararse. M-03 igual se rechaza si el despegue llevaría el desgaste a 100.
+- **Destrucción de la nave:** desgaste 100, energía 0 o combustible 0 la destruyen y marcan fallecida a la tripulación (condición de `Tanque.estaAgotado()`, revisada por el asistente). La preparación evita que la misión misma la provoque; durante el recorrido puede ocurrir por asteroides o batallas.
+- **Gemas canjeadas por combustible (M-02):** al cerrar, las gemas recolectadas se convierten en combustible (1 por gema). Lo que no entra en el tanque se pierde y queda informado como "gemas perdidas".
 - **Base de M-03:** el centro del tablero, que es donde comienza la nave.
-- **Un tablero por nave:** conserva su posición entre misiones, para que M-03 vuelva a la base.
+- **Un tablero por nave:** conserva su posición entre misiones, para que M-03 vuelva a la base. El tablero es de 12 × 12, con 15 asteroides, 4 estaciones de carga y 2 naves enemigas de cada tipo.
 - **Misiones en otro hilo:** `Sesion` las lanza y permite una sola a la vez.
+- **Preparación del warp anticipada:** cada salto simple avanza la preparación (`Disponible` → `Preparando salto` → `En warp`). El motor queda listo en `En warp` hasta que el radar detecta un obstáculo y se ejecuta `saltarWarp`. Fuera de `En warp`, `saltarWarp` hace un salto simple.
 - **Enfriamiento** existe y es alcanzable desde `En warp`; vuelve a `Disponible` en el siguiente salto.
 - **Valores fijos como `enum`** (`TipoNave`, `TipoEvento`, `Cargo`, `Origen`, `ResultadoMision`, `ResultadoBatalla`): un valor inexistente no compila, y los `switch` trabajan directamente sobre ellos.
 - **Ids de nave:** los asigna `NaveFactory` con un contador. `Universo` guarda las naves en un arreglo de capacidad fija (`CAPACIDAD = 10`).

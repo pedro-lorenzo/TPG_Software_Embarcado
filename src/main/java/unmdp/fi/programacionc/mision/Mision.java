@@ -6,6 +6,7 @@ import unmdp.fi.programacionc.destinoytablero.Destino;
 import unmdp.fi.programacionc.destinoytablero.Posicion;
 import unmdp.fi.programacionc.destinoytablero.Tablero;
 import unmdp.fi.programacionc.motor.MotorWarp;
+import unmdp.fi.programacionc.recursos.Tanque;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +42,8 @@ public abstract class Mision {
     private boolean finalizada = false;
     private List<Posicion> ruta = new ArrayList<>();
     private boolean destinoVerificado = false;
-    private volatile Posicion objetivo;   // lo escribe el hilo de la mision, lo lee el de Swing
+    private volatile Posicion objetivo;// lo escribe el hilo de la mision, lo lee el de Swing
+    private final BalanceRecursos balance = new BalanceRecursos();
 
     /**
      * pre -> codigo, nombre y descripcion no nulos ni vacios
@@ -75,10 +77,6 @@ public abstract class Mision {
     public final ResultadoMision ejecutarCiclo() {
         assert !finalizada : "La mision " + codigo + " ya fue ejecutada";
 
-        int combustibleInicial = asistente.getCombustible();
-        int energiaInicial = asistente.getEnergia();
-        int desgasteInicial = asistente.getDesgaste();
-
         ResultadoMision resultado;
         String motivo = null;
         try {
@@ -91,10 +89,8 @@ public abstract class Mision {
             asistente.registrarEvento(TipoEvento.ERROR, codigo + " rechazada: " + motivo);
         }
         String observaciones = (resultado == ResultadoMision.RECHAZADA) ? motivo : explicarResultado(resultado);
-        // Informe (Aclaracion R5): consumos del recorrido, medidos despues de evaluar y antes de cerrar
-        int combustibleConsumido = combustibleInicial - asistente.getCombustible();
-        int energiaConsumida = energiaInicial - asistente.getEnergia();
-        int desgasteProducido = asistente.getDesgaste() - desgasteInicial;
+        // Informe (Aclaracion R5): lo consumido, ganado y perdido en el recorrido lo fue anotando
+        // el balance (despegue en ejecutar() y cada turno en Travesia); si fue RECHAZADA queda en 0.
 
         // Cierre: impacta el estado; su balance es la diferencia de antes y despues de cerrar()
         int combustibleAntes = asistente.getCombustible();
@@ -104,8 +100,7 @@ public abstract class Mision {
         int gemasObtenidas = gemasObtenidas();
         int gemasPerdidas = gemasPerdidas();
 
-        InformeMision informe = new InformeMision(codigo, nombre, resultado, ruta,
-                combustibleConsumido, energiaConsumida, desgasteProducido,
+        InformeMision informe = new InformeMision(codigo, nombre, resultado, ruta, balance,
                 asistente.getCombustible() - combustibleAntes,
                 asistente.getEnergia() - energiaAntes,
                 asistente.getDesgaste() - desgasteAntes,
@@ -134,19 +129,23 @@ public abstract class Mision {
         objetivo = calcularObjetivo(tablero);
         ruta = Ruta.calcular(tablero.getPosicionNave(), objetivo);
 
-        // Recursos minimos: el despegue mas un salto simple por casillero (el peor caso, sin warp)
-        int combustibleMinimo = getCombustibleRequerido() + ruta.size() * MotorWarp.COMBUSTIBLE_SALTO;
-        if (asistente.getCombustible() < combustibleMinimo) {
-            throw new MisionNoEjecutableException("combustible insuficiente (requiere " + combustibleMinimo
+        // Recursos minimos: el despegue mas un salto simple por casillero (el peor caso, sin warp).
+        // Combustible o energia en 0, o desgaste en el tope, destruyen la nave (Tanque.estaAgotado):
+        // por eso no alcanza con tener lo justo, tiene que sobrar.
+        int combustibleNecesario = getCombustibleRequerido() + ruta.size() * MotorWarp.COMBUSTIBLE_SALTO;
+        if (asistente.getCombustible() <= combustibleNecesario) {
+            throw new MisionNoEjecutableException("combustible insuficiente (necesita mas de " + combustibleNecesario
                     + ": " + getCombustibleRequerido() + " de despegue + " + ruta.size()
                     + " saltos de " + MotorWarp.COMBUSTIBLE_SALTO + ", hay " + asistente.getCombustible() + ")");
         }
-        if (asistente.getEnergia() < getEnergiaRequerida()) {
-            throw new MisionNoEjecutableException("energia insuficiente (requiere "
+        if (asistente.getEnergia() <= getEnergiaRequerida()) {
+            throw new MisionNoEjecutableException("energia insuficiente (necesita mas de "
                     + getEnergiaRequerida() + ", hay " + asistente.getEnergia() + ")");
         }
-        asistente.registrarEvento(TipoEvento.MISION, codigo + ": preparacion correcta, ruta de "
-                + ruta.size() + " pasos hacia " + objetivo.getX() + "," + objetivo.getY());
+        if (asistente.getDesgaste() + DESGASTE_PRODUCIDO >= Tanque.TOPE_DESGASTE) {
+            throw new MisionNoEjecutableException("desgaste demasiado alto para despegar (tiene "
+                    + asistente.getDesgaste() + " y el despegue suma " + DESGASTE_PRODUCIDO + ")");
+        }
     }
 
     /**
@@ -156,8 +155,10 @@ public abstract class Mision {
      * pre -> preparar() termino sin excepcion (lo garantiza el template)
      */
     private void ejecutar() {
+        balance.anotarAntes(asistente);
         asistente.consumir(getCombustibleRequerido(), getEnergiaRequerida(), DESGASTE_PRODUCIDO);
-        Travesia travesia = new Travesia(tablero, destino, asistente, asistente);
+        balance.registrarConsumo(asistente);
+        Travesia travesia = new Travesia(tablero, destino, asistente, asistente, balance);
         llegoAlDestino = travesia.recorrer(ruta);
         destinoVerificado = llegoAlDestino && verificarEnDestino();
         if (llegoAlDestino && !destinoVerificado) {

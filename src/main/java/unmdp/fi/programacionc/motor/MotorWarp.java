@@ -63,9 +63,14 @@ public class MotorWarp {
         return CASILLEROS_SALTO;
     }
 
-    /** Salto simple y desgaste de enfriamiento en una sola operacion del tanque (atomica). */
+    /**
+     * Salto simple y desgaste de enfriamiento.
+     * Si no alcanza el combustible se lanza la excepcion antes de tocar nada. El desgaste es un
+     * efecto del enfriamiento, no se rechaza: se topea en el maximo (y eso destruye la nave).
+     */
     int avanzarUnCasilleroCobrandoEnfriamiento() {
-        tanque.consumir(COMBUSTIBLE_SALTO, 0, DESGASTE_ENFRIAMIENTO);
+        tanque.consumir(COMBUSTIBLE_SALTO, 0, 0);
+        tanque.sumarDesgasteHastaTope(DESGASTE_ENFRIAMIENTO);
         return CASILLEROS_SALTO;
     }
 

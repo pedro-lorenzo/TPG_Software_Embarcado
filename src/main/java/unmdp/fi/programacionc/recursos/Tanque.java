@@ -121,6 +121,19 @@ public class Tanque {
         return this.combustible == 0 || this.energia == 0 || this.desgaste == TOPE_DESGASTE;
     }
 
+    /**
+     * Desgaste que produce el propio funcionamiento de la nave (enfriamiento del motor warp).
+     * Como el danio de un asteroide, no es una orden que se pueda rechazar: si se pasa del tope,
+     * el desgaste queda en TOPE_DESGASTE y la nave queda agotada (estaAgotado() == true).
+     * pre -> desgaste > 0
+     * post -> desgaste = min(TOPE_DESGASTE, desgaste anterior + desgaste)
+     */
+    public void sumarDesgasteHastaTope(int desgaste) {
+        assert desgaste > 0 : "El desgaste a sumar debe ser positivo";
+        this.desgaste = Math.min(TOPE_DESGASTE, this.desgaste + desgaste);
+        assert verificarInvariante();
+    }
+
     public boolean necesitaMantenimiento() {
         return this.desgaste >= UMBRAL_MANTENIMIENTO;
     }

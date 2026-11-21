@@ -18,6 +18,10 @@ public class InformeMision {
     private final int combustibleConsumido;
     private final int energiaConsumida;
     private final int desgasteProducido;
+    private final int combustibleGanado;
+    private final int energiaGanada;
+    private final int combustiblePerdido;
+    private final int energiaPerdida;
     private final int cierreCombustible;
     private final int cierreEnergia;
     private final int cierreDesgaste;
@@ -26,18 +30,27 @@ public class InformeMision {
     private final String estadoMotor;
     private final String observaciones;
 
+    /**
+     * Copia los valores del balance: el informe no queda atado a un objeto que se puede seguir modificando.
+     * pre -> balance != null
+     */
     public InformeMision(String codigo, String nombre, ResultadoMision resultado, List<Posicion> ruta,
-                         int combustibleConsumido, int energiaConsumida, int desgasteProducido,
+                         BalanceRecursos balance,
                          int cierreCombustible, int cierreEnergia, int cierreDesgaste,
                          int gemasObtenidas, int gemasPerdidas,
                          String estadoMotor, String observaciones) {
+        assert balance != null : "El informe necesita el balance de la mision";
         this.codigo = codigo;
         this.nombre = nombre;
         this.resultado = resultado;
         this.ruta = Collections.unmodifiableList(new ArrayList<>(ruta));
-        this.combustibleConsumido = combustibleConsumido;
-        this.energiaConsumida = energiaConsumida;
-        this.desgasteProducido = desgasteProducido;
+        this.combustibleConsumido = balance.getCombustibleConsumido();
+        this.energiaConsumida = balance.getEnergiaConsumida();
+        this.desgasteProducido = balance.getDesgasteProducido();
+        this.combustibleGanado = balance.getCombustibleGanado();
+        this.energiaGanada = balance.getEnergiaGanada();
+        this.combustiblePerdido = balance.getCombustiblePerdido();
+        this.energiaPerdida = balance.getEnergiaPerdida();
         this.cierreCombustible = cierreCombustible;
         this.cierreEnergia = cierreEnergia;
         this.cierreDesgaste = cierreDesgaste;
@@ -54,9 +67,13 @@ public class InformeMision {
     public int getCombustibleConsumido()    { return combustibleConsumido; }
     public int getEnergiaConsumida()        { return energiaConsumida; }
     public int getDesgasteProducido()       { return desgasteProducido; }
+    public int getCombustibleGanado()       { return combustibleGanado; }
+    public int getEnergiaGanada()           { return energiaGanada; }
+    public int getCombustiblePerdido()      { return combustiblePerdido; }
+    public int getEnergiaPerdida()          { return energiaPerdida; }
     public int getGemasObtenidas()          { return gemasObtenidas; }
     public int getGemasPerdidas()           { return gemasPerdidas; }
-    public String getEstadoMotor()         { return estadoMotor; }
+    public String getEstadoMotor()          { return estadoMotor; }
     public String getObservaciones()        { return observaciones; }
 
     /** Texto de una linea para la bitacora y para el historial de la pantalla. */
@@ -64,9 +81,10 @@ public class InformeMision {
         return nombre
                 + " | resultado=" + resultado
                 + " | ruta=" + ruta.size() + " pasos"
-                + " | combustible consumido=" + combustibleConsumido
-                + " | energia consumida=" + energiaConsumida
-                + " | desgaste producido=" + desgasteProducido
+                + " | consumido: combustible " + combustibleConsumido
+                + ", energia " + energiaConsumida + ", desgaste +" + desgasteProducido
+                + " | ganado en estaciones: combustible " + combustibleGanado + ", energia " + energiaGanada
+                + " | perdido por impactos: combustible " + combustiblePerdido + ", energia " + energiaPerdida
                 + " | cierre: combustible " + signado(cierreCombustible)
                 + ", energia " + signado(cierreEnergia)
                 + ", desgaste " + signado(cierreDesgaste)

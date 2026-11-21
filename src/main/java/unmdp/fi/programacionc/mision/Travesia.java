@@ -18,15 +18,22 @@ public class Travesia {
     private final Destino destino;
     private final OperadorMision asistente;
     private final NavePropia nave;
+    private final BalanceRecursos balance;
 
     private int paso;                    // cantidad de casillas de la ruta ya recorridas
     private boolean sinPoderAvanzar;
 
-    public Travesia(Tablero tablero, Destino destino, OperadorMision asistente, NavePropia nave) {
+    /**
+     * pre -> balance != null (la mision lo usa despues para el informe)
+     */
+    public Travesia(Tablero tablero, Destino destino, OperadorMision asistente, NavePropia nave,
+                    BalanceRecursos balance) {
+        assert balance != null : "La travesia necesita donde anotar el balance";
         this.tablero = tablero;
         this.destino = destino;
         this.asistente = asistente;
         this.nave = nave;
+        this.balance = balance;
     }
 
     /**
@@ -53,7 +60,9 @@ public class Travesia {
         // 1. Inspección de la posición actual
         ElementoDelUniverso elemento = tablero.inspeccionarPosicion();
         if (elemento != null) {
+            balance.anotarAntes(asistente);
             String consecuencia = elemento.interactuar(nave);
+            balance.registrarEncuentro(asistente);
             asistente.registrarEvento(TipoEvento.MISION, consecuencia);
             if (asistente.estaDestruida()) {
                 return;
@@ -71,6 +80,7 @@ public class Travesia {
 
         // 3. Planificación y movimiento
         int avanzados;
+        balance.anotarAntes(asistente);
         try {
             if (hayObstaculo && quedanDosCasillas) {
                 avanzados = asistente.saltarWarp();
@@ -81,6 +91,7 @@ public class Travesia {
             sinPoderAvanzar = true;
             return;
         }
+        balance.registrarConsumo(asistente);
         paso += avanzados;
         tablero.moverNave(ruta.get(paso - 1));
     }
