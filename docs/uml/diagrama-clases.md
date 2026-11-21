@@ -4,7 +4,7 @@ Los diagramas están escritos en [Mermaid](https://mermaid.js.org/): GitHub los 
 
 Se divide el sistema en cinco diagramas para que cada uno se pueda leer. Muestran las clases y relaciones principales, no todos los métodos. Las responsabilidades de cada clase están en [`../diseno.md`](../diseno.md).
 
-Convenciones: `<|--` herencia, `<|..` implementa una interfaz, `*--` composición (el todo crea y es dueño de la parte), `o--` agregación, `-->` conoce o usa, `..>` depende o crea.
+Convenciones: `<|--` herencia, `<|..` implementa una interfaz, `*--` composición (el todo crea y es dueño de la parte), `o--` agregación, `-->` conoce o usa, `..>` depende o crea. En los métodos, `$` indica estático y `*` indica abstracto.
 
 ## 1. Núcleo: universo, naves, asistente y motor
 
@@ -41,6 +41,9 @@ classDiagram
         <<interface>>
         +getEventos() List
         +getInformes() List
+        +cargarCombustible(int)
+        +cargarEnergia(int)
+        +realizarMantenimiento()
     }
     class AsistenteComando
     class Tanque {
@@ -50,6 +53,10 @@ classDiagram
         +consumir(int, int, int)
         +cargarCombustible(int)
         +cargarEnergia(int)
+        +realizarMantenimiento()
+        +recibirDanio(int)
+        +recargarHastaTope(int, int)
+        +sumarDesgasteHastaTope(int)
         +estaAgotado() boolean
     }
     class MotorWarp {
@@ -76,7 +83,8 @@ classDiagram
         <<enumeration>>
     }
     class Tripulante {
-        <<inmutable>>
+        +marcarFallecido()
+        +estaFallecido() boolean
     }
     class Cargo {
         <<enumeration>>
@@ -84,9 +92,12 @@ classDiagram
     class Origen {
         <<enumeration>>
     }
+    class RuntimeException
+    class OperacionInvalidaException
 
     Universo o-- Nave
     NaveFactory ..> Nave : crea
+    NaveFactory ..> AsistenteComando : crea (única clase que la conoce)
     NaveFactory ..> TipoNave
     Combatiente <|.. Nave
     Nave <|-- NaveExploradora
@@ -99,6 +110,8 @@ classDiagram
     Asistente <|.. AsistenteComando
     AsistenteComando --> Tanque : opera
     AsistenteComando --> MotorWarp : opera
+    AsistenteComando --> Combatiente : delega enfrentar
+    AsistenteComando --> Tripulante : marca fallecidos
     AsistenteComando *-- Bitacora
     Bitacora *-- EventoBitacora
     EventoBitacora --> TipoEvento
@@ -110,7 +123,11 @@ classDiagram
     EstadoMotor <|.. Enfriamiento
     Tripulante --> Cargo
     Tripulante --> Origen
+    RuntimeException <|-- OperacionInvalidaException
+    Tanque ..> OperacionInvalidaException : lanza
 ```
+
+`Tanque` tiene dos tipos de operaciones. Las **órdenes** (`consumir`, `cargarCombustible`, `cargarEnergia`) lanzan `OperacionInvalidaException` sin modificar nada si violarían un límite. Los **efectos** (`recibirDanio`, `recargarHastaTope`, `sumarDesgasteHastaTope`) no se rechazan: se topean en el límite del recurso.
 
 ## 2. Misiones, travesía y tablero
 
@@ -118,13 +135,17 @@ classDiagram
 classDiagram
     class Mision {
         <<abstract>>
-        +ejecutarCiclo() ResultadoMision$
+        -BalanceRecursos balance
+        +ejecutarCiclo() ResultadoMision
         -preparar()
         -ejecutar()
-        #evaluar() ResultadoMision
-        #cerrar(ResultadoMision, String)
-        #calcularObjetivo(Tablero) Posicion
+        #getCombustibleRequerido() int*
+        #getEnergiaRequerida() int*
+        #requiereMantenimientoAlDia() boolean
+        #calcularObjetivo(Tablero) Posicion*
         #verificarEnDestino() boolean
+        #evaluar() ResultadoMision*
+        #cerrar(ResultadoMision, String)*
     }
     class MisionIntercepcion
     class MisionRecoleccion
@@ -135,8 +156,14 @@ classDiagram
         FALLIDA
         RECHAZADA
     }
+    class BalanceRecursos {
+        +anotarAntes(OperadorMision)
+        +registrarConsumo(OperadorMision)
+        +registrarEncuentro(OperadorMision)
+    }
     class InformeMision {
         <<inmutable>>
+        +resumen() String
     }
     class Travesia {
         +recorrer(List) boolean
@@ -174,14 +201,15 @@ classDiagram
     class ElementoDelUniverso {
         <<interface>>
         +interactuar(NavePropia) String
+        +esObstaculo() boolean
     }
     class Asteroide
     class EstacionDeCarga
     class NaveEnemiga {
         <<abstract>>
-        +recibirDeExplorador() ResultadoBatalla
-        +recibirDeCarguero() ResultadoBatalla
-        +recibirDeCombate() ResultadoBatalla
+        +recibirDeExplorador() ResultadoBatalla*
+        +recibirDeCarguero() ResultadoBatalla*
+        +recibirDeCombate() ResultadoBatalla*
     }
     class NaveEnemigaExploradora
     class NaveEnemigaCarguero
@@ -192,6 +220,8 @@ classDiagram
         GANA
         PIERDE
     }
+    class RuntimeException
+    class MisionNoEjecutableException
 
     Mision <|-- MisionIntercepcion
     Mision <|-- MisionRecoleccion
@@ -199,15 +229,21 @@ classDiagram
     Mision --> OperadorMision : consulta y ordena
     Mision --> Tablero
     Mision --> Destino
+    Mision *-- BalanceRecursos
     Mision ..> Travesia : usa
     Mision ..> Ruta : usa
     Mision ..> InformeMision : crea
     Mision ..> ResultadoMision
+    Mision ..> MisionNoEjecutableException : lanza y captura
+    RuntimeException <|-- MisionNoEjecutableException
+    InformeMision ..> BalanceRecursos : copia sus valores
     NavePropia <|-- OperadorMision
     OperadorMision <|-- Asistente
     Travesia --> Tablero
     Travesia --> Destino
     Travesia --> OperadorMision
+    Travesia --> NavePropia : se la pasa a los elementos
+    Travesia --> BalanceRecursos : anota cada turno
     Destino --> Tablero
     Tablero --|> Observable
     Observable o-- Observador
@@ -225,6 +261,8 @@ classDiagram
 ```
 
 `Tablero`, `Destino`, `Observable`, `Observador` y `Posicion` son provistos por la cátedra.
+
+`ejecutarCiclo()` es el método plantilla: es `final` y fija el orden preparar → ejecutar → evaluar → cerrar. Los métodos marcados con `*` los implementa cada misión; `requiereMantenimientoAlDia()` y `verificarEnDestino()` tienen una implementación por defecto que algunas misiones redefinen (M-03 y M-01, respectivamente).
 
 ## 3. Liquidación de haberes (Decorator)
 
@@ -258,6 +296,8 @@ classDiagram
     LiquidadorHaberes ..> ComponenteHaber : arma la cadena
     LiquidadorHaberes ..> Tripulante
     HaberBase ..> Tripulante
+    AdicionalAntiguedad ..> Tripulante
+    SubsidioOrigen ..> Tripulante
 ```
 
 ## 4. Interfaz (MVC), sesión y persistencia
@@ -292,6 +332,8 @@ classDiagram
 
     class ObservadorSesion { <<interface>> }
     class Sesion {
+        +crearNave(TipoNave) Nave
+        +agregarTripulante(String, Cargo, Origen, int) Tripulante
         +iniciarMision(String)
         +agregarObservador(ObservadorSesion)
         +notificar()
@@ -305,7 +347,10 @@ classDiagram
     class UsuarioDTO
     class Universo
     class Nave
+    class NaveFactory
+    class Mision
     class Tablero
+    class Destino
     class UniversoParalelo
 
     IVistaLogin <|.. VentanaLogin
@@ -318,11 +363,14 @@ classDiagram
 
     ControladorLogin --> IVistaLogin
     ControladorLogin --> ControlAcceso
-    ControladorLogin ..> ControladorPrincipal : abre
+    ControladorLogin ..> ControladorRegistro : abre el registro
+    ControladorLogin ..> ControladorPrincipal : abre al ingresar
     ControladorRegistro --> IVistaRegistro
     ControladorRegistro --> ControlAcceso
+    ControladorRegistro --> IVistaLogin : vuelve al login
     ControladorPrincipal --> VentanaPrincipal
     ControladorPrincipal --> Sesion
+    ControladorPrincipal ..> UniversoParalelo : crea y detiene al cerrar
     ControladorPrincipal ..> ControladorCreacion : arma
     ControladorPrincipal ..> ControladorTripulantes : arma
     ControladorPrincipal ..> ControladorControl : arma
@@ -345,8 +393,12 @@ classDiagram
     Sesion o-- ObservadorSesion
     Sesion --> Universo
     Sesion --> Nave : nave actual
+    Sesion ..> NaveFactory : crea naves
     Sesion --> Tablero : uno por nave
+    Sesion --> Destino
+    Sesion ..> Mision : crea y lanza en otro hilo
     ControlAcceso --> UsuarioDAO
+    ControlAcceso ..> UsuarioDTO
     UsuarioDAO <|.. UsuarioDAOJdbc
     UsuarioDAO ..> UsuarioDTO
 ```
@@ -377,7 +429,7 @@ classDiagram
     class EntidadParalela {
         <<abstract>>
         +run()
-        #ciclo()
+        #ciclo()*
         +detener()
     }
     class GeneradoraDeEnergia
