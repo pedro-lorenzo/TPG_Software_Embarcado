@@ -231,7 +231,7 @@ public class Main {
 
     // ===================== MISIONES DE LA DEMO =====================
     // Desde la Parte 2 cada mision recorre un tablero. Para la demo por consola alcanza
-    // con un tablero vacio de 20x20 (sin asteroides, estaciones ni enemigas).
+    // con un tablero vacio de 7x7 (sin asteroides, estaciones ni enemigas).
 
     private static Tablero tableroVacio() {
         try {

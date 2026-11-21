@@ -16,7 +16,7 @@ Diagrama de clases: [`uml/diagrama-clases.md`](uml/diagrama-clases.md).
 
 **Entrega 2** (sobre el mismo proyecto, sin reemplazar nada):
 
-- Las misiones M-01, M-02 y M-03 se ejecutan sobre un **tablero** de 20 × 20 con asteroides, estaciones de carga y naves enemigas (batallas con Double Dispatch).
+- Las misiones M-01, M-02 y M-03 se ejecutan sobre un **tablero** de 12 × 12 con asteroides, estaciones de carga y naves enemigas (batallas con Double Dispatch).
 - El **motor warp** pasa a la especificación del anexo (preparación de dos turnos, costos de salto y enfriamiento).
 - **Acceso al sistema** con usuario y contraseña persistidos en H2 (DAO/DTO, JDBC).
 - **Interfaz Swing** organizada en MVC, con actualización automática mediante Observer.
