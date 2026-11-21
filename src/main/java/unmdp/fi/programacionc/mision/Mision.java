@@ -146,6 +146,8 @@ public abstract class Mision {
             throw new MisionNoEjecutableException("desgaste demasiado alto para despegar (tiene "
                     + asistente.getDesgaste() + " y el despegue suma " + DESGASTE_PRODUCIDO + ")");
         }
+        asistente.registrarEvento(TipoEvento.MISION, codigo + ": preparacion correcta, ruta de "
+                + ruta.size() + " pasos hacia " + objetivo.getX() + "," + objetivo.getY());
     }
 
     /**
