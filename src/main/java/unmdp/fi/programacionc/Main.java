@@ -110,7 +110,10 @@ public class Main {
         ejecutar(m01(asistente), asistente);
         asistente.realizarMantenimiento();
         mostrarRecursos("Despues del mantenimiento", asistente);
-        ejecutar(m01(asistente), asistente);
+
+        // B.3: pedido de auxilio con semilla fija: asi el resultado de la demo es reproducible
+        Tablero tablero = tableroVacio();
+        ejecutar(new MisionIntercepcion(asistente, new Random(2), tablero, new Destino(tablero)), asistente);
 
         mostrarBitacora(asistente);
     }
